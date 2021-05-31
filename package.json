@@ -2,6 +2,7 @@
   "name": "xch-wallet",
   "version": "1.0.0",
   "description": "A modern interface for the Chia wallet",
+  "productName": "XCH Wallet",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
