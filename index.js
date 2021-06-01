@@ -65,9 +65,13 @@ const loginKey = (fingerprint) => {
 			let wallets = await wallet.getWallets();
 			let balance = await wallet.getWalletBalance(1) || {};
 			let transactions = await wallet.getTransactions(1, 100) || [];
+			let connectionsList = await connections.getConnections();
+			let blockchainState = await fullnode.getBlockchainState();
 			console.log(wallets);
 			console.log(balance);
 			console.log(transactions);
+			console.log(connectionsList);
+			console.log(blockchainState);
 			hideAll();
 			document.querySelector("#menu").style.display = "block";
 			switchPage("node");

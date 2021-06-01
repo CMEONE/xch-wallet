@@ -180,6 +180,103 @@ function Connections() {
 	}
 }
 
+function FullNode() {
+	const sendCommand = (command, args) => {
+		return new Promise(async (resolve, reject) => {
+			let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+			ipcRenderer.on(`response-fullnode-${token}`, (event, response) => resolve(response));
+			ipcRenderer.send("fullnode", {
+				command,
+				args,
+				token
+			});
+		});
+	}
+
+	this.getBlockchainState = () => {
+		return sendCommand("getBlockchainState", {});
+	}
+
+	this.getNetworkSpace = (newerBlockHeaderHash, olderBlockHeaderHash) => {
+		return sendCommand("getNetworkSpace", {
+			newerBlockHeaderHash,
+			olderBlockHeaderHash
+		});
+	}
+
+	this.getBlocks = (start, end, excludeHeaderHash) => {
+		return sendCommand("getBlocks", {
+			start,
+			end,
+			excludeHeaderHash
+		});
+	}
+
+	this.getBlock = (headerHash) => {
+		return sendCommand("getBlock", {
+			headerHash
+		});
+	}
+
+	this.getBlockRecordByHeight = (height) => {
+		return sendCommand("getBlockRecordByHeight", {
+			height
+		});
+	}
+
+	this.getBlockRecord = (hash) => {
+		return sendCommand("getBlockRecord", {
+			hash
+		});
+	}
+
+	this.getUnfinishedBlockHeaders = (height) => {
+		return sendCommand("getUnfinishedBlockHeaders", {
+			height
+		});
+	}
+
+	this.getUnspentCoins = (puzzleHash, startHeight, endHeight) => {
+		return sendCommand("getUnspentCoins", {
+			puzzleHash,
+			startHeight,
+			endHeight
+		});
+	}
+
+	this.getCoinRecordByName = (name) => {
+		return sendCommand("getCoinRecordByName", {
+			name
+		});
+	}
+
+	this.getAdditionsAndRemovals = (hash) => {
+		return sendCommand("getAdditionsAndRemovals", {
+			hash
+		});
+	}
+
+	this.addressToPuzzleHash = (address) => {
+		return sendCommand("addressToPuzzleHash", {
+			address
+		});
+	}
+
+	this.puzzleHashToAddress = (puzzleHash) => {
+		return sendCommand("puzzleHashToAddress", {
+			puzzleHash
+		});
+	}
+
+	this.getCoinInfo = (parentCoinInfo, puzzleHash, amount) => {
+		return sendCommand("getCoinInfo", {
+			parentCoinInfo,
+			puzzleHash,
+			amount
+		});
+	}
+}
+
 const execute = (command) => {
 	return new Promise(async (resolve, reject) => {
 		cli(command, (error, stdout, stderr) => {
@@ -203,6 +300,7 @@ if(process.platform === 'darwin') {
 
 const wallet = new Wallet();
 const connections = new Connections();
+const fullnode = new FullNode();
 
 const hideAll = (hideMenu = true, hideLoader = true) => {
 	let elements = ["#keys", "#modal", "#page_node", "#page_wallet", "#page_plots", "#page_farm", "#page_apps", "#page_settings"];
@@ -271,6 +369,7 @@ const getKeyName = (key, index) => {
 const expose = () => {
 	contextBridge.exposeInMainWorld("wallet", wallet);
 	contextBridge.exposeInMainWorld("connections", connections);
+	contextBridge.exposeInMainWorld("fullnode", fullnode);
 	contextBridge.exposeInMainWorld("hideAll", hideAll);
 	contextBridge.exposeInMainWorld("showKeys", showKeys);
 	contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);

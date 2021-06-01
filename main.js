@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
-const { Wallet, SharedCalls } = require("chia-client");
+const { Wallet, SharedCalls, FullNode } = require("chia-client");
 const wallet = new Wallet();
 const connections = new SharedCalls();
+const fullnode = new FullNode();
 
 let win;
 
@@ -152,5 +153,63 @@ ipcMain.on("connections", (event, params) => {
 		});
 	} else {
 		win.webContents.send(`response-connections-${params.token}`, undefined);
+	}
+});
+
+ipcMain.on("fullnode", (event, params) => {
+	if(params.command == "getBlockchainState") {
+		fullnode.getBlockchainState().then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getNetworkSpace") {
+		fullnode.getNetworkSpace(params.args.newerBlockHeaderHash, params.args.olderBlockHeaderHash).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getBlocks") {
+		fullnode.getBlocks(params.args.start, params.args.end, params.args.excludeHeaderHash).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getBlock") {
+		fullnode.getBlock(params.args.headerHash).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getBlockRecordByHeight") {
+		fullnode.getBlockRecordByHeight(params.args.height).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getBlockRecord") {
+		fullnode.getBlockRecord(params.args.hash).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getUnfinishedBlockHeaders") {
+		fullnode.getUnfinishedBlockHeaders(params.args.height).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getUnspentCoins") {
+		fullnode.getUnspentCoins(params.args.puzzleHash, params.args.startHeight, params.args.endHeight).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getCoinRecordByName") {
+		fullnode.getCoinRecordByName(params.args.name).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getAdditionsAndRemovals") {
+		fullnode.getAdditionsAndRemovals(params.args.hash).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "addressToPuzzleHash") {
+		fullnode.addressToPuzzleHash(params.args.address).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "puzzleHashToAddress") {
+		fullnode.puzzleHashToAddress(params.args.puzzleHash).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else if(params.command == "getCoinInfo") {
+		fullnode.getCoinInfo(params.args.parentCoinInfo, params.args.puzzleHash, params.args.amount).then((res) => {
+			win.webContents.send(`response-fullnode-${params.token}`, res);
+		});
+	} else {
+		win.webContents.send(`response-fullnode-${params.token}`, undefined);
 	}
 });
