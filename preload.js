@@ -357,12 +357,20 @@ const setKeySettings = (value, key = null) => {
 	}
 }
 
-const getKeyName = (key, index) => {
-	let keySettings = getKeySettings(key);
-	if(keySettings.name == null) {
-		return `Key ${index + 1} (${key})`;
+const getKeyName = (key, index, includeFingerprint = true) => {
+	if(key != null && parseInt(key) != NaN) {
+		let keySettings = getKeySettings(key);
+		let addition = "";
+		if(includeFingerprint) {
+			addition = ` (${key})`;
+		}
+		if(keySettings.name == null) {
+			return `Key ${index + 1}${addition}`;
+		} else {
+			return `${keySettings.name}${addition}`;
+		}
 	} else {
-		return `${keySettings.name} (${key})`;
+		return "Key";
 	}
 }
 
@@ -374,6 +382,7 @@ const expose = () => {
 	contextBridge.exposeInMainWorld("showKeys", showKeys);
 	contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
 	contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
+	contextBridge.exposeInMainWorld("getKeyName", getKeyName);
 }
 
 const showKeys = () => {
@@ -383,8 +392,8 @@ const showKeys = () => {
 	wallet.getPublicKeys().then((keys) => {
 		document.querySelector("#keylist").innerHTML = keys.map((key, index) => {
 			return `<div class="key-option">
-				<div class="opener" onclick="loginKey(${key});">
-					<p>${getKeyName(key, index)}</p>
+				<div class="opener" onclick="loginKey(${key}, ${index});">
+					<p>${getKeyName(key, index, true)}</p>
 				</div>
 				<div class="options">
 					<i class="fas fa-eye show-btn" onclick="showPrivKey(${key});"></i><br>

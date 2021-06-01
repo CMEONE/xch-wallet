@@ -42,7 +42,12 @@
 			<h3 class="notice">The Apps page is coming soon!</h3>
 		</div>
 		<div class="page" id="page_settings" style="display: none;">
-			<h3 class="notice">The Settings page is coming soon!</h3>
+			<h2 class="page-title">Settings:</h2>
+			<div class="pane">
+				<h3 class="action">Key Name:</h3>
+				<input class="input-full" placeholder="Key Name" id="input_settings_keyname" />
+				<button class="button-left" onclick="saveKeyName(document.querySelector('#input_settings_keyname').value)">Save</button>
+			</div>
 		</div>
 		<div id="menu" style="display: none;">
 			<div class="menu-item" id="menuitem_node" onclick="switchPage('node');">

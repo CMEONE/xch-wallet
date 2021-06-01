@@ -221,7 +221,7 @@ html, body {
 	left: 30px;
 	top: 30px;
 	width: 150px;
-	height: calc(100% - 60px);
+	max-height: calc(100% - 60px);
 	padding: 25px;
 	box-sizing: border-box;
 	border-radius: 25px;
@@ -282,19 +282,93 @@ html, body {
 .page {
 	margin-left: 210px;
 	margin-top: 45px;
-	width: calc(100% - 210px);
-}
-
-.page > .page-title {
-	font-size: 2em;
-	text-align: center;
+	width: calc(100% - 240px);
 }
 
 .page > .notice {
 	position: absolute;
 	left: 50%;
-	top: 35px;
+	top: 45px;
 	transform: translate(-50%, 0);
 	margin: 0;
 	font-size: 1.5em;
+}
+
+.page > .page-title {
+	margin: 0;
+	font-size: 2.5em;
+	text-align: left;
+}
+
+.pane {
+	padding: 35px;
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 25px;
+	border-radius: 25px;
+	background-color: var(--background);
+	box-shadow: var(--shadow);
+	overflow-x: hidden;
+}
+
+.pane > .action {
+	margin: 0;
+	margin-bottom: 10px;
+	font-size: 1.85em;
+}
+
+.input-full {
+	width: 100%;
+	font-size: 1.5em;
+	padding: 5px;
+	margin: 10px;
+	margin-left: 0;
+	box-sizing: border-box;
+	background-color: var(--background);
+	border: 3px solid var(--green);
+	border-radius: 10px;
+	box-shadow: var(--shadow);
+	transform: scale(1);
+	transition: transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out;
+}
+
+.input-full:active, .input-full:focus {
+	transform: scale(0.99);
+	box-shadow: none;
+	outline: none;
+}
+
+.button-left {
+	font-size: 1.35em;
+	padding: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+	box-sizing: border-box;
+	background-color: var(--green);
+	color: var(--background);
+	cursor: pointer;
+	border: none;
+	border-radius: 10px;
+	box-shadow: var(--shadow);
+	margin: 10px;
+	margin-right: 0;
+	margin-left: 100%;
+	transform: translate(-100%, 0) scale(1);
+	transition: transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out;
+}
+
+.button-left:hover {
+	transform: translate(-100%, 0) scale(1.05);
+}
+
+.button-left:active {
+	transform: translate(-100%, 0) scale(0.98);
+	box-shadow: var(--shadow-active);
+	outline: none;
+}
+
+.button-left:focus {
+	outline: none;
 }

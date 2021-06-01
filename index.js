@@ -55,13 +55,17 @@ const deletePrivKey = (fingerprint) => {
 }
 
 let page = "";
+let key;
+let keyindex;
 
-const loginKey = (fingerprint) => {
+const loginKey = (fingerprint, index) => {
 	document.querySelector("#overlay").style.display = "block";
 	document.querySelector("#loader > h3").innerHTML = `Logging into Wallet...`;
 	document.querySelector("#loader").style.display = "block";
 	wallet.logIn(fingerprint).then(async (res) => {
 		if(res.success) {
+			key = fingerprint;
+			keyindex = index;
 			let wallets = await wallet.getWallets();
 			let balance = await wallet.getWalletBalance(1) || {};
 			let transactions = await wallet.getTransactions(1, 100) || [];
@@ -90,5 +94,25 @@ const switchPage = (pageName) => {
 		}
 		document.querySelector(`#menuitem_${pageName}`).classList.add("menu-item-active");
 	}
+	if(pageName == "settings") {
+		document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
+	}
 	document.querySelector(`#page_${pageName}`).style.display = "block";
+}
+
+const saveKeyName = (newKeyName) => {
+	if(newKeyName == "") {
+		newKeyName = null;
+	}
+	let keySettings = getKeySettings();
+	keySettings.name = newKeyName;
+	setKeySettings(keySettings, key);
+	document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
+	createModal("Key Name Set:", 
+		`<p>The name for the key with fingerprint <b>${key}</b> is now <b>${getKeyName(key, keyindex, false)}</b>.`, [{
+			text: "Close",
+			action: `closeModal()`,
+			color: "green"
+		}]
+	);
 }
