@@ -1,6 +1,6 @@
 const cli = require('child_process').exec;
 const fs = require('fs');
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, contextBridge } = require('electron');
 
 function Wallet() {
 	const sendCommand = (command, args) => {
@@ -47,6 +47,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	execute(`${chia} init && ${chia} start wallet`).then((res) => {
 		document.getElementById("loader").innerHTML = `<p>Connecting to Wallet...</p>`;
 		wallet.getPublicKeys().then((keys) => {
+			contextBridge.exposeInMainWorld("wallet", wallet);
 			console.log(keys);
 		});
 	}).catch((err) => {
