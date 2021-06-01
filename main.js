@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 
 const { Wallet, SharedCalls, FullNode } = require("chia-client");
@@ -22,6 +22,11 @@ const createWindow = () => {
 	});
 
 	win.loadFile('index.html');
+
+	win.webContents.on('new-window', function(e, url) {
+		e.preventDefault();
+		shell.openExternal(url);
+	});
 }
 
 app.whenReady().then(() => {
