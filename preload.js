@@ -16,7 +16,25 @@ function Wallet() {
 	}
 
 	this.getPublicKeys = () => {
-		return sendCommand("getPublicKeys", []);
+		return sendCommand("getPublicKeys", {});
+	}
+
+	this.getPrivateKey = (fingerprint) => {
+		return sendCommand("getPrivateKey", {
+			fingerprint
+		});
+	}
+
+	this.deleteKey = (fingerprint) => {
+		return sendCommand("deleteKey", {
+			fingerprint
+		});
+	}
+
+	this.logIn = (fingerprint) => {
+		return sendCommand("logIn", {
+			fingerprint
+		});
 	}
 }
 
@@ -43,13 +61,32 @@ if(process.platform === 'darwin') {
 
 const wallet = new Wallet();
 
+const showKeys = () => {
+	wallet.getPublicKeys().then((keys) => {
+		document.querySelector("#keylist").innerHTML = keys.map((key) => {
+			return `<div class="key-option">
+				<div class="opener" onclick="loginKey(${key});">
+					<p>${key}</p>
+				</div>
+				<div class="options">
+					<i class="fas fa-eye show-btn" onclick="showPrivKey(${key});"></i><br>
+					<i class="fas fa-trash trash-btn" onclick="deletePrivKey(${key});"></i>
+				</div>
+			</div>`;
+		}).join("");
+		document.querySelector("#loader").style.display = "none";
+		document.querySelector("#keys").style.display = "block";
+	});
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+	document.querySelector("#loader > h3").innerHTML = `Starting Chia Daemon...`;
+	document.querySelector("#loader").style.display = "block";
 	execute(`${chia} init && ${chia} start wallet`).then((res) => {
 		document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
-		wallet.getPublicKeys().then((keys) => {
-			contextBridge.exposeInMainWorld("wallet", wallet);
-			console.log(keys);
-		});
+		contextBridge.exposeInMainWorld("showKeys", showKeys);
+		contextBridge.exposeInMainWorld("wallet", wallet);
+		showKeys();
 	}).catch((err) => {
 		throw err;
 	});

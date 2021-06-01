@@ -11,10 +11,19 @@
 :root {
 	--background: #373c46;
 	--white: #efefef;
+	--green: #51d876;
+	--red: #ff0000;
+	--shadow: 0 0 26px 0 #000000;
+	--shadow-active: 0 0 16px 0 #000000;
 }
 
 * {
 	font-family: 'Nunito', sans-serif;
+	color: var(--white);
+}
+
+b {
+	font-family: 'Nunito-Bold', sans-serif;
 }
 
 html, body {
@@ -23,20 +32,181 @@ html, body {
 	width: 100%;
 	height: 100%;
 	background-color: var(--background);
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 
 #loader {
 	margin: 0;
 	padding: 0;
-	position: absolute;
+	position: fixed;
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
+	text-align: center;
+	z-index: 15;
 }
 
 #loader > h3 {
 	margin: 0;
 	padding: 0;
-	color: var(--white);
 	font-size: 1.75em;
+}
+
+#loader > i {
+	font-size:  3em;
+	margin-bottom: 25px;
+}
+
+.title {
+	font-size: 2.5em;
+	text-align: center;
+}
+
+#keylist {
+	width: 350px;
+	margin-left: 50%;
+	transform: translate(-50%, 0);
+	margin-top: 20px;
+}
+
+#keylist > .key-option {
+	position: relative;
+	width: 100%;
+	height: 100px;
+	margin: 0;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	cursor: pointer;
+	border-radius: 10px;
+	box-shadow: var(--shadow);
+	transform: scale(1);
+	transition: transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out;
+}
+
+#keylist > .key-option:hover {
+	transform: scale(1.05);
+}
+
+#keylist > .key-option:active {
+	transform: scale(0.98);
+	box-shadow: var(--shadow-active);
+}
+
+#keylist > .key-option > .opener {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+#keylist > .key-option > .opener > p {
+	position: absolute;
+	margin: 0;
+	left: 35px;
+	top: 50%;
+	transform: translate(0, -50%);
+	font-size: 1.5em;
+}
+
+#keylist > .key-option > .options {
+	position: absolute;
+    text-align: center;
+	z-index: 2;
+	margin: 0;
+	right: 15px;
+	top: 50%;
+	transform: translate(0, -50%);
+}
+
+#keylist > .key-option > .options > i {
+	font-size:  1.5em;
+	margin: 5px;
+}
+
+#overlay {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 5;
+}
+
+#modal {
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 75%;
+	overflow-wrap: anywhere;
+	z-index: 10;
+	border-radius: 25px;
+	box-shadow: var(--shadow);
+	padding: 20px;
+	padding-bottom: 100px;
+	background-color: var(--background);
+}
+
+#modal > .modal-title {
+	font-size: 1.5em;
+	text-align: center;
+	margin: 0;
+	margin-bottom: 25px;
+}
+
+#modal > .modal-text {
+	font-size: 1em;
+	margin: 0;
+	text-align: left;
+}
+
+#modal > .modal-buttons {
+	position: absolute;
+	bottom: 10px;
+	left: 50%;
+	transform: translate(-50%, 0);
+}
+
+#modal > .modal-buttons > .modal-button {
+	border: none;
+	text-align: center;
+	font-size: 1.2em;
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	cursor: pointer;
+	margin: 10px;
+	border-radius: 5px;
+	box-shadow: var(--shadow);
+	transform: scale(1);
+	transition: transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out;
+}
+
+#modal > .modal-buttons > .modal-button-green {
+	background-color: var(--green);
+	color: var(--background);
+}
+
+#modal > .modal-buttons > .modal-button-gray {
+	background-color: var(--background);
+	color: var(--white);
+}
+
+#modal > .modal-buttons > .modal-button-red {
+	background-color: var(--red);
+	color: var(--white);
+}
+
+#modal > .modal-buttons > .modal-button:hover {
+	transform: scale(1.05);
+}
+
+#modal > .modal-buttons > .modal-button:active {
+	transform: scale(0.98);
+	box-shadow: var(--shadow-active);
 }
