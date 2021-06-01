@@ -182,15 +182,65 @@ const hideAll = (hideMenu = true, hideLoader = true) => {
 	}
 }
 
+const getKeySettings = (key = null) => {
+	if(key == null) {
+		let items = Object.keys(localStorage);
+		let settings = {}; 
+		for(let i = 0; i < items.length; i++) {
+			if(items[i].startsWith("keyprefs-")) {
+				let parsed = {};
+				try {
+					parsed = JSON.parse(localStorage.getItem(items[i]));
+				} catch(err) {
+					localStorage.setItem(items[i], JSON.stringify({}));
+				}
+				settings[parseInt(items[i].replace("keyprefs-", ""))] = parsed;
+			}
+		}
+		return settings;
+	} else {
+		if(localStorage.getItem(`keyprefs-${key}`) == null) {
+			localStorage.setItem(`keyprefs-${key}`, JSON.stringify({}));
+		}
+		let parsed = {};
+		try {
+			parsed = JSON.parse(localStorage.getItem(`keyprefs-${key}`));
+		} catch(err) {
+			localStorage.setItem(`keyprefs-${key}`, JSON.stringify({}));
+		}
+		return parsed;
+	}
+}
+
+const setKeySettings = (value, key = null) => {
+	if(key == null) {
+		let items = Object.keys(value);
+		for(let i = 0; i < items.length; i++) {
+			localStorage.setItem(`keyprefs-${items[i]}`, JSON.stringify(value[items[i]]));
+		}
+	} else {
+		localStorage.setItem(`keyprefs-${key}`, JSON.stringify(value));
+	}
+}
+
+const getKeyName = (key, index) => {
+	let keySettings = getKeySettings(key);
+	if(keySettings.name == null) {
+		return `Key ${index + 1} (${key})`;
+	} else {
+		return `${keySettings.name} (${key})`;
+	}
+}
+
 const showKeys = () => {
 	hideAll(true, false);
 	document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
 	document.querySelector("#loader").style.display = "block";
 	wallet.getPublicKeys().then((keys) => {
-		document.querySelector("#keylist").innerHTML = keys.map((key) => {
+		document.querySelector("#keylist").innerHTML = keys.map((key, index) => {
 			return `<div class="key-option">
 				<div class="opener" onclick="loginKey(${key});">
-					<p>${key}</p>
+					<p>${getKeyName(key, index)}</p>
 				</div>
 				<div class="options">
 					<i class="fas fa-eye show-btn" onclick="showPrivKey(${key});"></i><br>
@@ -210,12 +260,16 @@ window.addEventListener('DOMContentLoaded', () => {
 		contextBridge.exposeInMainWorld("wallet", wallet);
 		contextBridge.exposeInMainWorld("hideAll", hideAll);
 		contextBridge.exposeInMainWorld("showKeys", showKeys);
+		contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
+		contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
 		showKeys();
 	}).catch((err) => {
 		execute(`${chia} init && ${chia} start wallet`).then((res) => {
 			contextBridge.exposeInMainWorld("wallet", wallet);
 			contextBridge.exposeInMainWorld("hideAll", hideAll);
 			contextBridge.exposeInMainWorld("showKeys", showKeys);
+			contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
+			contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
 			showKeys();
 		}).catch((err) => {
 			throw err;

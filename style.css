@@ -110,6 +110,10 @@ html, body {
 	top: 50%;
 	transform: translate(0, -50%);
 	font-size: 1.5em;
+	width: 390px;
+	white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 #keylist > .key-option > .options {
