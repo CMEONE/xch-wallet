@@ -66,11 +66,14 @@ const loginKey = (fingerprint) => {
 			console.log(wallets);
 			console.log(balance);
 			console.log(transactions);
-			document.querySelector("#keys").style.display = "none";
+			hideAll();
 			document.querySelector("#menu").style.display = "block";
-			document.querySelector("#page_wallet").style.display = "block";
-			document.querySelector("#loader").style.display = "none";
-			document.querySelector("#overlay").style.display = "none";
+			document.querySelector("#page_node").style.display = "block";
 		}
-	})
+	});
+}
+
+const switchPage = (pageName) => {
+	hideAll(false);
+	document.querySelector(`#page_${pageName}`).style.display = "block";
 }

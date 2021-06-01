@@ -65,10 +65,10 @@ html, body {
 }
 
 #keylist {
-	width: 350px;
+	width: 500px;
 	margin-left: 50%;
 	transform: translate(-50%, 0);
-	margin-top: 20px;
+	margin-top: 50px;
 }
 
 #keylist > .key-option {
@@ -81,6 +81,7 @@ html, body {
 	cursor: pointer;
 	border-radius: 10px;
 	box-shadow: var(--shadow);
+	background-color: var(--background);
 	transform: scale(1);
 	transition: transform 0.2s ease-in-out,
 				box-shadow 0.2s ease-in-out;
@@ -209,4 +210,65 @@ html, body {
 #modal > .modal-buttons > .modal-button:active {
 	transform: scale(0.98);
 	box-shadow: var(--shadow-active);
+}
+
+#menu {
+	position: fixed;
+	left: 30px;
+	top: 30px;
+	width: 150px;
+	height: calc(100% - 60px);
+	padding: 25px;
+	box-sizing: border-box;
+	border-radius: 25px;
+	overflow-y: auto;
+	background-color: var(--background);
+	box-shadow: var(--shadow);
+}
+
+#menu > .menu-item {
+	width: 100px;
+	height: 100px;
+	padding: 10px;
+	margin-bottom: 25px;
+	box-sizing: border-box;
+	border-radius: 10px;
+	cursor: pointer;
+	background-color: var(--background);
+	box-shadow: var(--shadow);
+	transform: scale(1);
+	transition: transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out;
+}
+
+#menu > .menu-item > .menu-icon {
+	font-size: 2.5em;
+	text-align: center;
+	margin: 0;
+}
+
+#menu > .menu-item > .menu-text {
+	font-size: 1.05em;
+	text-align: center;
+	margin: 0;
+}
+
+#menu > .menu-item:hover {
+	transform: scale(1.05);
+}
+
+#menu > .menu-item:active {
+	transform: scale(0.98);
+	box-shadow: var(--shadow-active);
+}
+
+.page {
+	margin-left: 210px;
+	margin-top: 30px;
+	width: calc(100% - 210px);
+}
+
+.page > .page-title {
+	font-size: 2em;
+	text-align: center;
 }

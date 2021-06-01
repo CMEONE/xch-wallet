@@ -168,7 +168,24 @@ if(process.platform === 'darwin') {
 
 const wallet = new Wallet();
 
+const hideAll = (hideMenu = true, hideLoader = true) => {
+	let elements = ["#keys", "#modal", "#page_node", "#page_wallet", "#page_plots", "#page_farm", "#page_apps", "#page_settings"];
+	for(let i = 0; i < elements.length; i++) {
+		document.querySelector(`${elements[i]}`).style.display = "none";
+	}
+	if(hideMenu) {
+		document.querySelector("#menu").style.display = "none";
+	}
+	if(hideLoader) {
+		document.querySelector("#overlay").style.display = "none";
+		document.querySelector("#loader").style.display = "none";
+	}
+}
+
 const showKeys = () => {
+	hideAll(true, false);
+	document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
+	document.querySelector("#loader").style.display = "block";
 	wallet.getPublicKeys().then((keys) => {
 		document.querySelector("#keylist").innerHTML = keys.map((key) => {
 			return `<div class="key-option">
@@ -190,15 +207,15 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector("#loader > h3").innerHTML = `Starting Chia Daemon...`;
 	document.querySelector("#loader").style.display = "block";
 	execute(`chia init && chia start wallet`).then((res) => {
-		document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
-		contextBridge.exposeInMainWorld("showKeys", showKeys);
 		contextBridge.exposeInMainWorld("wallet", wallet);
+		contextBridge.exposeInMainWorld("hideAll", hideAll);
+		contextBridge.exposeInMainWorld("showKeys", showKeys);
 		showKeys();
 	}).catch((err) => {
 		execute(`${chia} init && ${chia} start wallet`).then((res) => {
-			document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
-			contextBridge.exposeInMainWorld("showKeys", showKeys);
 			contextBridge.exposeInMainWorld("wallet", wallet);
+			contextBridge.exposeInMainWorld("hideAll", hideAll);
+			contextBridge.exposeInMainWorld("showKeys", showKeys);
 			showKeys();
 		}).catch((err) => {
 			throw err;
