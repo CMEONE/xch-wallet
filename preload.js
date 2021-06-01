@@ -45,7 +45,7 @@ const wallet = new Wallet();
 
 window.addEventListener('DOMContentLoaded', () => {
 	execute(`${chia} init && ${chia} start wallet`).then((res) => {
-		document.getElementById("loader").innerHTML = `<p>Connecting to Wallet...</p>`;
+		document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
 		wallet.getPublicKeys().then((keys) => {
 			contextBridge.exposeInMainWorld("wallet", wallet);
 			console.log(keys);

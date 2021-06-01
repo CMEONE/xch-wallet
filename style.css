@@ -1,6 +1,20 @@
+@font-face {
+	font-family: 'Nunito';
+	src: url("./Nunito/Nunito-Regular.ttf");
+}
+
+@font-face {
+	font-family: 'Nunito-Bold';
+	src: url("./Nunito/Nunito-Bold.ttf");
+}
+
 :root {
 	--background: #373c46;
 	--white: #efefef;
+}
+
+* {
+	font-family: 'Nunito', sans-serif;
 }
 
 html, body {
@@ -20,9 +34,9 @@ html, body {
 	transform: translate(-50%, -50%);
 }
 
-#loader > p {
+#loader > h3 {
 	margin: 0;
 	padding: 0;
 	color: var(--white);
-	font-size: 1.25em;
+	font-size: 1.75em;
 }
