@@ -54,6 +54,8 @@ const deletePrivKey = (fingerprint) => {
 	);
 }
 
+let page = "";
+
 const loginKey = (fingerprint) => {
 	document.querySelector("#overlay").style.display = "block";
 	document.querySelector("#loader > h3").innerHTML = `Logging into Wallet...`;
@@ -68,12 +70,21 @@ const loginKey = (fingerprint) => {
 			console.log(transactions);
 			hideAll();
 			document.querySelector("#menu").style.display = "block";
-			document.querySelector("#page_node").style.display = "block";
+			switchPage("node");
 		}
 	});
 }
 
+
 const switchPage = (pageName) => {
-	hideAll(false);
+	if(page != pageName) {
+		page = pageName;
+		hideAll(false);
+		let menuItemsActive = document.querySelectorAll(`.menu-item-active`);
+		for(let i = 0; i < menuItemsActive.length; i++) {
+			menuItemsActive[i].classList.remove("menu-item-active");
+		}
+		document.querySelector(`#menuitem_${pageName}`).classList.add("menu-item-active");
+	}
 	document.querySelector(`#page_${pageName}`).style.display = "block";
 }

@@ -238,7 +238,12 @@ html, body {
 	box-shadow: var(--shadow);
 	transform: scale(1);
 	transition: transform 0.2s ease-in-out,
-				box-shadow 0.2s ease-in-out;
+				box-shadow 0.2s ease-in-out,
+				background-color 0.2s ease-in-out;
+}
+
+#menu > .menu-item * {
+	transition: color 0.2s ease-in-out;
 }
 
 #menu > .menu-item > .menu-icon {
@@ -262,13 +267,30 @@ html, body {
 	box-shadow: var(--shadow-active);
 }
 
+#menu > .menu-item.menu-item-active {
+	background-color: var(--green);
+}
+
+#menu > .menu-item.menu-item-active * {
+	color: var(--background);
+}
+
 .page {
 	margin-left: 210px;
-	margin-top: 30px;
+	margin-top: 45px;
 	width: calc(100% - 210px);
 }
 
 .page > .page-title {
 	font-size: 2em;
 	text-align: center;
+}
+
+.page > .notice {
+	position: absolute;
+	left: 50%;
+	top: 35px;
+	transform: translate(-50%, 0);
+	margin: 0;
+	font-size: 1.5em;
 }
