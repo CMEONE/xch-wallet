@@ -58,13 +58,19 @@ const loginKey = (fingerprint) => {
 	document.querySelector("#overlay").style.display = "block";
 	document.querySelector("#loader > h3").innerHTML = `Logging into Wallet...`;
 	document.querySelector("#loader").style.display = "block";
-	wallet.logIn(fingerprint).then((res) => {
-		document.querySelector("#loader").style.display = "none";
-		document.querySelector("#overlay").style.display = "none";
+	wallet.logIn(fingerprint).then(async (res) => {
 		if(res.success) {
+			let wallets = await wallet.getWallets();
+			let balance = await wallet.getWalletBalance(1) || {};
+			let transactions = await wallet.getTransactions(1, 100) || [];
+			console.log(wallets);
+			console.log(balance);
+			console.log(transactions);
 			document.querySelector("#keys").style.display = "none";
 			document.querySelector("#menu").style.display = "block";
 			document.querySelector("#page_wallet").style.display = "block";
+			document.querySelector("#loader").style.display = "none";
+			document.querySelector("#overlay").style.display = "none";
 		}
 	})
 }

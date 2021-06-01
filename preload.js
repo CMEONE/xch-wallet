@@ -15,6 +15,25 @@ function Wallet() {
 		});
 	}
 
+	this.logIn = (fingerprint) => {
+		return sendCommand("logIn", {
+			fingerprint
+		});
+	}
+
+	this.logInAndRestore = (fingerprint, filePath) => {
+		return sendCommand("logInAndRestore", {
+			fingerprint,
+			filePath
+		});
+	}
+
+	this.logInAndSkip = (fingerprint) => {
+		return sendCommand("logInAndSkip", {
+			fingerprint
+		});
+	}
+
 	this.getPublicKeys = () => {
 		return sendCommand("getPublicKeys", {});
 	}
@@ -25,15 +44,103 @@ function Wallet() {
 		});
 	}
 
+	this.generateMnemonic = () => {
+		return sendCommand("generateMnemonic", {});
+	}
+
+	this.addKey = (mnemonic, type = "new_wallet") => {
+		return sendCommand("addKey", {
+			mnemonic,
+			type
+		});
+	}
+
 	this.deleteKey = (fingerprint) => {
 		return sendCommand("deleteKey", {
 			fingerprint
 		});
 	}
 
-	this.logIn = (fingerprint) => {
-		return sendCommand("logIn", {
-			fingerprint
+	this.deleteAllKeys = () => {
+		return sendCommand("deleteAllKeys", {});
+	}
+
+	this.getSyncStatus = () => {
+		return sendCommand("getSyncStatus", {});
+	}
+
+	this.getHeightInfo = () => {
+		return sendCommand("getHeightInfo", {});
+	}
+
+	this.farmBlock = (address) => {
+		return sendCommand("farmBlock", {
+			address
+		});
+	}
+
+	this.getWallets = () => {
+		return sendCommand("getWallets", {});
+	}
+
+	this.getWalletBalance = (walletId) => {
+		return sendCommand("getWalletBalance", {
+			walletId
+		});
+	}
+
+	this.getTransaction = (walletId, transactionId) => {
+		return sendCommand("getTransaction", {
+			walletId,
+			transactionId
+		});
+	}
+
+	this.getTransactions = (walletId, limit) => {
+		return sendCommand("getTransactions", {
+			walletId,
+			limit
+		});
+	}
+
+	this.getNextAddress = (walletId) => {
+		return sendCommand("getNextAddress", {
+			walletId
+		});
+	}
+
+	this.sendTransaction = (walletId, amount, address, fee) => {
+		return sendCommand("sendTransaction", {
+			walletId,
+			amount,
+			address,
+			fee
+		});
+	}
+
+	this.createBackup = (filePath) => {
+		return sendCommand("createBackup", {
+			filePath
+		});
+	}
+
+	this.addressToPuzzleHash = (address) => {
+		return sendCommand("addressToPuzzleHash", {
+			address
+		});
+	}
+
+	this.puzzleHashToAddress = (puzzleHash) => {
+		return sendCommand("puzzleHashToAddress", {
+			puzzleHash
+		});
+	}
+
+	this.getCoinInfo = (parentCoinInfo, puzzleHash, amount) => {
+		return sendCommand("getCoinInfo", {
+			parentCoinInfo,
+			puzzleHash,
+			amount
 		});
 	}
 }
@@ -54,7 +161,7 @@ let chia = "chia";
 if(process.platform === 'darwin') {
 	chia = "/Applications/Chia.app/Contents/Resources/app.asar.unpacked/daemon/chia";
 } else if(process.platform === "win32") {
-	chia = fs.readdirSync("~\\AppData\\Local\\chia-blockchain\\").filter(f => f.startsWith("app-"))[0] + "\\resources\\app.asar.unpacked\\daemon\\chia.exe";
+	chia = "~\\AppData\\Local\\chia-blockchain\\" + fs.readdirSync("~\\AppData\\Local\\chia-blockchain\\").filter(f => f.startsWith("app-")).sort().reverse()[0] + "\\resources\\app.asar.unpacked\\daemon\\chia.exe";
 } else if(process.platform === "linux") {
 	chia = "/usr/lib/chia-blockchain/resources/app.asar.unpacked/daemon/chia";
 }
@@ -82,12 +189,20 @@ const showKeys = () => {
 window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector("#loader > h3").innerHTML = `Starting Chia Daemon...`;
 	document.querySelector("#loader").style.display = "block";
-	execute(`${chia} init && ${chia} start wallet`).then((res) => {
+	execute(`chia init && chia start wallet`).then((res) => {
 		document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
 		contextBridge.exposeInMainWorld("showKeys", showKeys);
 		contextBridge.exposeInMainWorld("wallet", wallet);
 		showKeys();
 	}).catch((err) => {
-		throw err;
-	});
+		execute(`${chia} init && ${chia} start wallet`).then((res) => {
+			document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
+			contextBridge.exposeInMainWorld("showKeys", showKeys);
+			contextBridge.exposeInMainWorld("wallet", wallet);
+			showKeys();
+		}).catch((err) => {
+			throw err;
+		});
+	})
+	
 });
