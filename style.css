@@ -1,5 +1,6 @@
 :root {
-	--background: #373C46;
+	--background: #373c46;
+	--white: #efefef;
 }
 
 html, body {
@@ -8,4 +9,20 @@ html, body {
 	width: 100%;
 	height: 100%;
 	background-color: var(--background);
+}
+
+#loader {
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+#loader > p {
+	margin: 0;
+	padding: 0;
+	color: var(--white);
+	font-size: 1.25em;
 }

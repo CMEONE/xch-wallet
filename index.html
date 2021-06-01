@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" type="text/css" href="./style.css" />
-    <title>XCH Wallet</title>
-  </head>
-  <body>
-    
-  </body>
+	<head>
+		<meta charset="UTF-8">
+		<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://localhost:*">
+		<meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+		<link rel="stylesheet" type="text/css" href="./style.css" />
+		<title>XCH Wallet</title>
+	</head>
+	<body>
+		<div id="loader">
+			<p>Starting Chia Daemon...</p>
+		</div>
+	</body>
 </html>
