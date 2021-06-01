@@ -145,6 +145,41 @@ function Wallet() {
 	}
 }
 
+function Connections() {
+	const sendCommand = (command, args) => {
+		return new Promise(async (resolve, reject) => {
+			let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+			ipcRenderer.on(`response-connections-${token}`, (event, response) => resolve(response));
+			ipcRenderer.send("connections", {
+				command,
+				args,
+				token
+			});
+		});
+	}
+
+	this.getConnections = () => {
+		return sendCommand("getConnections", {});
+	}
+
+	this.openConnection = (host, port) => {
+		return sendCommand("openConnection", {
+			host,
+			port
+		});
+	}
+
+	this.closeConnection = (nodeId) => {
+		return sendCommand("closeConnection", {
+			nodeId
+		});
+	}
+
+	this.stopNode = () => {
+		return sendCommand("stopNode", {});
+	}
+}
+
 const execute = (command) => {
 	return new Promise(async (resolve, reject) => {
 		cli(command, (error, stdout, stderr) => {
@@ -167,6 +202,7 @@ if(process.platform === 'darwin') {
 }
 
 const wallet = new Wallet();
+const connections = new Connections();
 
 const hideAll = (hideMenu = true, hideLoader = true) => {
 	let elements = ["#keys", "#modal", "#page_node", "#page_wallet", "#page_plots", "#page_farm", "#page_apps", "#page_settings"];
@@ -232,6 +268,15 @@ const getKeyName = (key, index) => {
 	}
 }
 
+const expose = () => {
+	contextBridge.exposeInMainWorld("wallet", wallet);
+	contextBridge.exposeInMainWorld("connections", connections);
+	contextBridge.exposeInMainWorld("hideAll", hideAll);
+	contextBridge.exposeInMainWorld("showKeys", showKeys);
+	contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
+	contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
+}
+
 const showKeys = () => {
 	hideAll(true, false);
 	document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
@@ -257,19 +302,11 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector("#loader > h3").innerHTML = `Starting Chia Daemon...`;
 	document.querySelector("#loader").style.display = "block";
 	execute(`chia init && chia start wallet`).then((res) => {
-		contextBridge.exposeInMainWorld("wallet", wallet);
-		contextBridge.exposeInMainWorld("hideAll", hideAll);
-		contextBridge.exposeInMainWorld("showKeys", showKeys);
-		contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
-		contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
+		expose();
 		showKeys();
 	}).catch((err) => {
 		execute(`${chia} init && ${chia} start wallet`).then((res) => {
-			contextBridge.exposeInMainWorld("wallet", wallet);
-			contextBridge.exposeInMainWorld("hideAll", hideAll);
-			contextBridge.exposeInMainWorld("showKeys", showKeys);
-			contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
-			contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
+			expose();
 			showKeys();
 		}).catch((err) => {
 			throw err;

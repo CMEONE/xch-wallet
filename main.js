@@ -1,8 +1,9 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
-const { Wallet } = require("chia-client");
+const { Wallet, SharedCalls } = require("chia-client");
 const wallet = new Wallet();
+const connections = new SharedCalls();
 
 let win;
 
@@ -10,6 +11,8 @@ const createWindow = () => {
 	win = new BrowserWindow({
 		width: 1200,
 		height: 1000,
+		minWidth: 550,
+		minHeight: 550,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js')
 		},
@@ -127,5 +130,27 @@ ipcMain.on("wallet", (event, params) => {
 		});
 	} else {
 		win.webContents.send(`response-wallet-${params.token}`, undefined);
+	}
+});
+
+ipcMain.on("connections", (event, params) => {
+	if(params.command == "getConnections") {
+		connections.getConnections().then((res) => {
+			win.webContents.send(`response-connections-${params.token}`, res);
+		});
+	} else if(params.command == "openConnection") {
+		connections.openConnection(params.args.host, params.args.port).then((res) => {
+			win.webContents.send(`response-connections-${params.token}`, res);
+		});
+	} else if(params.command == "closeConnection") {
+		connections.closeConnection(params.args.nodeId).then((res) => {
+			win.webContents.send(`response-connections-${params.token}`, res);
+		});
+	} else if(params.command == "stopNode") {
+		connections.stopNode().then((res) => {
+			win.webContents.send(`response-connections-${params.token}`, res);
+		});
+	} else {
+		win.webContents.send(`response-connections-${params.token}`, undefined);
 	}
 });
