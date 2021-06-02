@@ -383,12 +383,14 @@ const expose = () => {
 	contextBridge.exposeInMainWorld("getKeySettings", getKeySettings);
 	contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
 	contextBridge.exposeInMainWorld("getKeyName", getKeyName);
+	contextBridge.exposeInMainWorld("chia", runChiaCommand);
 }
 
 const showKeys = () => {
 	hideAll(true, false);
 	document.querySelector("#loader > h3").innerHTML = `Connecting to Wallet...`;
 	document.querySelector("#loader").style.display = "block";
+	document.querySelector("#terminal").innerHTML = `<code class="green"><b>chia > </b></code>`;
 	wallet.getPublicKeys().then((keys) => {
 		document.querySelector("#keylist").innerHTML = keys.map((key, index) => {
 			return `<div class="key-option">
@@ -406,6 +408,71 @@ const showKeys = () => {
 	});
 }
 
+const runChiaCommand = (command, fingerprint = null) => {
+	return new Promise(async (resolve, reject) => {
+		let resolved = false;
+		command = command.replaceAll(";", "").replaceAll("&", "").replaceAll("&", "");
+		if(command.startsWith("chia ")) {
+			command = command.substring(5);
+		}
+		if(!command.includes(" -f ") && !command.includes(" --fingerprint ") && fingerprint != null) {
+			runChiaCommand(command + " --fingerprint " + fingerprint, null).then((res) => {
+				if(!resolved) {
+					resolved = true;
+					resolve(res);
+				}
+			}).catch((err1) => {
+				runChiaCommand(command, null).then((res) => {
+					if(!resolved) {
+						resolved = true;
+						resolve(res);
+					}
+				}).catch((err2) => {
+					if(!resolved) {
+						resolved = true;
+						if(err2.includes("Error: Missing option '--fingerprint' / '-f'")) {
+							reject(err1);
+						} else {
+							reject(err2);
+						}
+					}
+				})
+			})
+		} else {
+			execute(`chia ${command}`).then((res) => {
+				if(!resolved) {
+					resolved = true;
+					resolve(res);
+				}
+			}).catch((err1) => {
+				execute(`${chia} ${command}`).then((res) => {
+					if(!resolved) {
+						resolved = true;
+						resolve(res);
+					}
+				}).catch((err2) => {
+					if(!resolved) {
+						resolved = true;
+						reject(err2);
+					}
+				});
+			});
+		}
+		setTimeout(() => {
+			if(!resolved) {
+				resolved = true;
+				reject(
+`Command timed out!
+
+It is possible that this command returned a prompt for a complex interaction,
+which is not supported by the XCH Wallet Terminal. Please try the command again
+using the command parameters instead (use the \`-h\` option to view the parameters).`
+);
+			}
+		}, 60000);
+	});
+}
+
 window.addEventListener('DOMContentLoaded', () => {
 	document.querySelector("#loader > h3").innerHTML = `Starting Chia Daemon...`;
 	document.querySelector("#loader").style.display = "block";
@@ -419,6 +486,6 @@ window.addEventListener('DOMContentLoaded', () => {
 		}).catch((err) => {
 			throw err;
 		});
-	})
+	});
 	
 });

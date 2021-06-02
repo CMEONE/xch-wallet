@@ -46,7 +46,17 @@
 			<div class="pane">
 				<h3 class="action">Key Name:</h3>
 				<input class="input-full" placeholder="Key Name" id="input_settings_keyname" />
-				<button class="button-left" onclick="saveKeyName(document.querySelector('#input_settings_keyname').value)">Save</button>
+				<button class="button-left" id="button_settings_keyname" onclick="saveKeyName(document.querySelector('#input_settings_keyname').value)">Save</button>
+			</div>
+			<div class="pane">
+				<h3 class="action">Terminal:</h3>
+				<div id="terminal">
+					<code class="green"><b>chia > </b></code>
+				</div>
+				<input class="input-full" placeholder="Command (example: `-h`)" id="input_settings_terminal" />
+				<button class="button-left" id="button_settings_terminal" onclick="runCommand(document.querySelector('#input_settings_terminal').value)">Run</button>
+				<p>To abort a command, use the `abort` command.<br><br>
+				The XCH Wallet Terminal does not support prompts or complex interactions, so command parameters must be used instead (use `-h` after the command to view the parameters).</p>
 			</div>
 		</div>
 		<div id="menu" style="display: none;">

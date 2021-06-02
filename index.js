@@ -96,6 +96,9 @@ const switchPage = (pageName) => {
 	}
 	if(pageName == "settings") {
 		document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
+		if(document.querySelectorAll("#terminal > code").length == 1) {
+			runCommand("-h");
+		}
 	}
 	document.querySelector(`#page_${pageName}`).style.display = "block";
 }
@@ -104,15 +107,75 @@ const saveKeyName = (newKeyName) => {
 	if(newKeyName == "") {
 		newKeyName = null;
 	}
-	let keySettings = getKeySettings();
-	keySettings.name = newKeyName;
-	setKeySettings(keySettings, key);
-	document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
-	createModal("Key Name Set:", 
-		`<p>The name for the key with fingerprint <b>${key}</b> is now <b>${getKeyName(key, keyindex, false)}</b>.`, [{
-			text: "Close",
-			action: `closeModal()`,
-			color: "green"
-		}]
-	);
+	if(newKeyName == null || getKeyName(key, keyindex, false) != newKeyName) {
+		let keySettings = getKeySettings();
+		keySettings.name = newKeyName;
+		setKeySettings(keySettings, key);
+		document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
+		createModal("Key Name Set:", 
+			`<p>The name for the key with fingerprint <b>${key}</b> is now <b>${getKeyName(key, keyindex, false)}</b>.`, [{
+				text: "Close",
+				action: `closeModal()`,
+				color: "green"
+			}]
+		);
+	}
+}
+
+document.querySelector("#input_settings_keyname").addEventListener("keyup", function(event) {
+	if (event.keyCode === 13) {
+		event.preventDefault();
+		document.querySelector("#button_settings_keyname").click();
+	}
+});
+
+document.querySelector("#input_settings_terminal").addEventListener("keyup", function(event) {
+	if (event.keyCode === 13) {
+		event.preventDefault();
+		document.querySelector("#button_settings_terminal").click();
+	}
+});
+
+let runningCommand = false;
+let runningToken = "";
+
+const runCommand = (command) => {
+	if(command == "abort") {
+		document.querySelector("#terminal").scrollTop = document.querySelector("#terminal").scrollHeight;
+		runningToken = "";
+		runningCommand = false;
+		document.querySelector('#input_settings_terminal').value = "";
+		let terminalEntries = document.querySelectorAll("#terminal > code");
+		terminalEntries[terminalEntries.length - 1].innerHTML += command;
+		document.querySelector("#terminal").innerHTML += `<br><code class="red"><pre>Aborted!</pre></code>`;
+		document.querySelector("#terminal").innerHTML += `<code class="green"><b>chia > </b></code>`;
+		document.querySelector("#terminal").scrollTop = document.querySelector("#terminal").scrollHeight;
+	} else if(!runningCommand && command != null && command != "") {
+		document.querySelector("#terminal").scrollTop = document.querySelector("#terminal").scrollHeight;
+		runningCommand = true;
+		document.querySelector('#input_settings_terminal').value = "";
+		let terminalEntries = document.querySelectorAll("#terminal > code");
+		terminalEntries[terminalEntries.length - 1].innerHTML += command;
+		document.querySelector("#terminal").innerHTML += `<br><code></code>`;
+		terminalEntries = document.querySelectorAll("#terminal > code");
+		let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+		runningToken = token;
+		chia(command, key).then((res) => {
+			if(token == runningToken) {
+				runningToken = "";
+				terminalEntries[terminalEntries.length - 1].outerHTML = `<code><pre>${res}</pre></code>`;
+				document.querySelector("#terminal").innerHTML += `<code class="green"><b>chia > </b></code>`;
+				document.querySelector("#terminal").scrollTop = document.querySelector("#terminal").scrollHeight;
+				runningCommand = false;
+			}
+		}).catch((err) => {
+			if(token == runningToken) {
+				runningToken = "";
+				terminalEntries[terminalEntries.length - 1].outerHTML = `<code><pre class="red">${err}</pre></code>`;
+				document.querySelector("#terminal").innerHTML += `<code class="green"><b>chia > </b></code>`;
+				document.querySelector("#terminal").scrollTop = document.querySelector("#terminal").scrollHeight;
+				runningCommand = false;
+			}
+		});
+	}
 }
