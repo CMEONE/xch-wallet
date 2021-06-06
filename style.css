@@ -413,43 +413,43 @@ p.half-margin {
 	margin-bottom: 10px;
 }
 
-.connections-table-container {
+.node-table-container {
 	width: 100%;
 	box-shadow: var(--shadow-active);
 	overflow-x: auto;
 }
 
-.connections-table {
+.node-table {
 	border-collapse: collapse;
 	width: 100%;
 	box-sizing: border-box;
 	font-size: 0.8em;
 }
-.connections-table th.long > p, .connections-table td.long > p {
+.node-table th.long > p, .node-table td.long > p {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	margin: 5px;
 }
-.connections-table th.long, .connections-table td.long {
+.node-table th.long, .node-table td.long {
 	max-width: 100px;
 }
 
-.connections-table th, .connections-table td {
+.node-table th, .node-table td {
 	max-width: 75px;
 	white-space: pre-wrap;
 }
 
-.connections-table td, .connections-table th {
+.node-table td, .node-table th {
 	text-align: left;
 	padding: 10px;
 }
 
-.connections-table tr:nth-child(even) {
+.node-table tr:nth-child(even) {
 	background-color: var(--background-lighter);
 }
 
-.connections-table i {
+.node-table i {
 	font-size: 1.5em;
 	cursor: pointer;
 }

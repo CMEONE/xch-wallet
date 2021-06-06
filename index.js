@@ -95,6 +95,28 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 		prevBlockHeight -= 1;
 	}
 
+	prevBlockHeight = heightRaw;
+	let blocks = [];
+	let unfinished = await fullnode.getUnfinishedBlockHeaders();
+	if(unfinished.success) {
+		for(let i = 0; i < unfinished.headers.length; i++) {
+			blocks.push({
+				header_hash: unfinished.headers[i].foliage.foliage_transaction_block_hash,
+				timestamp: unfinished.headers[i].foliage_transaction_block.timestamp,
+				is_finished_state: "Unfinished"
+			});
+		}
+	}
+	for(let i = 0; i < 10; i++) {
+		let block = await fullnode.getBlockRecordByHeight(prevBlockHeight - i);
+		if(block.success) {
+			blocks.push({
+				...block.block_record,
+				is_finished_state: "Finished"
+			});
+		}
+	}
+
 	let time = (new Date(timeRaw * 1000)).toLocaleString();
 
 	let space = "0 GiB";
@@ -150,8 +172,8 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 
 	document.querySelector("#node_connections").innerHTML = `
 	<h3 class="action">Connections:</h3>
-	<div class="connections-table-container">
-		<table class="connections-table">
+	<div class="node-table-container">
+		<table class="node-table">
 			<tr>
 				<th class="long"><p>Node ID</p></th>
 				<th><p>IP Address</p></th>
@@ -197,6 +219,44 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 					<td><p>${formatType(conn.type)}</p></td>
 					<td><p>${formatHeight(conn.peak_height)}</p></td>
 					<td><p><i class="fas fa-trash trash-btn" onclick="deleteNodeModal('${conn.node_id}', '${formatType(conn.type)}', '${conn.peer_host}');"></i></p></td>
+				</tr>
+				`;
+			}).join("")}
+		</table>
+	</div>
+	`
+
+	document.querySelector("#node_blocks").innerHTML = `
+	<h3 class="action">Blocks:</h3>
+	<div class="node-table-container">
+		<table class="node-table">
+			<tr>
+				<th class="long"><p>Header Hash</p></th>
+				<th><p>Height</p></th>
+				<th><p>Time Created</p></th>
+				<th><p>State</p></th>
+			</tr>
+			${blocks.map((block) => {
+				const formatHeight = (h) => {
+					if(h == null) {
+						return "";
+					} else {
+						return (new Number(h)).toLocaleString();
+					}
+				}
+				const formatTime = (t) => {
+					if(t == null) {
+						return "";
+					} else {
+						return (new Date(t * 1000)).toLocaleString();
+					}
+				}
+				return `
+				<tr>
+					<td class="long"><p>${block.header_hash}</p></td>
+					<td><p>${formatHeight(block.height)}</p></td>
+					<td><p>${formatTime(block.timestamp)}</p></td>
+					<td><p>${block.is_finished_state}</p></td>
 				</tr>
 				`;
 			}).join("")}
