@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "electron": "^13.0.1"
   },
   "dependencies": {
-    "chia-client": "^9.5.0"
+    "chia-client": "^9.5.0",
+    "patch-package": "^6.4.7"
   }
 }

@@ -58,6 +58,104 @@ let page = "";
 let key;
 let keyindex;
 
+const updateNodeInfo = async (networkName, blockchainState, connectionsList) => {
+	let synced = "Not Synced"
+	let syncedColor = "red"
+	let heightRaw = 0;
+	let timeRaw = 0;
+	let spaceRaw = 0;
+	let difficultyRaw = 0;
+	let vdfSubSlotIterationsRaw = 0;
+	let vdfTotalIterationsRaw = 0;
+
+	if(blockchainState != null && blockchainState.success && blockchainState.blockchain_state != null) {
+		if(blockchainState.blockchain_state.sync.synced) {
+			synced = "Synced";
+			syncedColor = "green";
+		}
+		heightRaw = blockchainState.blockchain_state.peak.height;
+		timeRaw = blockchainState.blockchain_state.peak.timestamp || 0;
+		spaceRaw = blockchainState.blockchain_state.space || 0;
+		difficultyRaw = blockchainState.blockchain_state.difficulty || 0;
+		vdfSubSlotIterationsRaw = blockchainState.blockchain_state.peak.sub_slot_iters || 0;
+		vdfTotalIterationsRaw = blockchainState.blockchain_state.peak.total_iters || 0;
+	}
+
+	let height = (new Number(heightRaw)).toLocaleString();
+	let difficulty = (new Number(difficultyRaw)).toLocaleString();
+	let vdfSubSlotIterations = (new Number(vdfSubSlotIterationsRaw)).toLocaleString();
+	let vdfTotalIterations = (new Number(vdfTotalIterationsRaw)).toLocaleString();
+
+	let prevBlockHeight = height - 1;
+	while(timeRaw == 0 && prevBlockHeight != 0) {
+		let prevBlock = await fullnode.getBlockRecordByHeight(prevBlockHeight);
+		if(prevBlock.success) {
+			timeRaw = prevBlock.block_record.timestamp || 0;
+		}
+		prevBlockHeight -= 1;
+	}
+
+	let time = (new Date(timeRaw * 1000)).toLocaleString();
+
+	let space = "0 GiB";
+	if(spaceRaw >= 1024 * 1024 * 1024 * 1024 * 1024 * 1024) {
+		space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024 * 1024 * 1024)).toFixed(3)} EiB`;
+	} else if(spaceRaw >= 1024 * 1024 * 1024 * 1024 * 1024) {
+		space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024 * 1024)).toFixed(3)} PiB`;
+	} else if(spaceRaw >= 1024 * 1024 * 1024 * 1024) {
+		space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024)).toFixed(3)} TiB`;
+	} else if(spaceRaw >= 1024 * 1024 * 1024) {
+		space = `${(spaceRaw / (1024 * 1024 * 1024)).toFixed(3)} GiB`;
+	} else if(spaceRaw >= 1024 * 1024) {
+		space = `${(spaceRaw / (1024 * 1024)).toFixed(3)} MiB`;
+	} else if(spaceRaw >= 1024) {
+		space = `${(spaceRaw / 1024).toFixed(3)} KiB`;
+	} else {
+		space = `${spaceRaw.toFixed(3)} B`;
+	}
+
+	let connected = "Not Connected"
+	let connectedColor = "red"
+
+	if(connectionsList != null && connectionsList.success && connectionsList.connections != null) {
+		if(connectionsList.connections.filter(c => c.peer_host != "127.0.0.1").length > 0) {
+			connected = "Connected";
+			connectedColor = "green";
+		}
+	}
+
+	document.querySelector("#node_title").innerHTML = `Full Node (${networkName || "mainnet"}):`;
+
+	document.querySelector("#node_status").innerHTML = `
+	<h3 class="action">Status:</h3>
+	<p class="half half-margin"><b>Blockchain Status: </b> <span class="${syncedColor}">${synced}</span></p>
+	<p class="half half-margin"><b>Connection Status: </b> <span class="${connectedColor}">${connected}</span></p>
+	`;
+
+	document.querySelector("#node_peak").innerHTML = `
+	<h3 class="action">Peak:</h3>
+	<p class="half half-margin"><b>Height: </b> ${height}</p>
+	<p class="half half-margin"><b>Time: </b> ${time}</p>
+	`;
+
+	document.querySelector("#node_stats").innerHTML = `
+	<h3 class="action">Stats:</h3>
+	<p class="half half-margin"><b>Estimated Network Space: </b> ${space}</p>
+	<p class="half half-margin"><b>Difficulty: </b> ${difficulty}</p>
+	<p class="half half-margin"><b>VDF Sub Slot Iterations: </b> ${vdfSubSlotIterations}</p>
+	<p class="half half-margin"><b>VDF Total Iterations: </b> ${vdfTotalIterations}</p>
+	`;
+
+	setTimeout(async () => {
+		if(page == "node") {
+			networkName = (await fullnode.getNetworkInfo()).network_name;
+			connectionsList = await connections.getConnections() || {};
+			blockchainState = await fullnode.getBlockchainState() || {};
+		}
+		updateNodeInfo(networkName, blockchainState, connectionsList);
+	}, 10000);
+}
+
 const loginKey = (fingerprint, index) => {
 	document.querySelector("#overlay").style.display = "block";
 	document.querySelector("#loader > h3").innerHTML = `Logging into Wallet...`;
@@ -66,11 +164,13 @@ const loginKey = (fingerprint, index) => {
 		if(res.success) {
 			key = fingerprint;
 			keyindex = index;
-			let wallets = await wallet.getWallets();
+			let wallets = await wallet.getWallets() || [];
 			let balance = await wallet.getWalletBalance(1) || {};
 			let transactions = await wallet.getTransactions(1, 100) || [];
-			let connectionsList = await connections.getConnections();
-			let blockchainState = await fullnode.getBlockchainState();
+			let connectionsList = await connections.getConnections() || {};
+			let blockchainState = await fullnode.getBlockchainState() || {};
+			let networkName = (await fullnode.getNetworkInfo()).network_name;
+			updateNodeInfo(networkName, blockchainState, connectionsList);
 			console.log(wallets);
 			console.log(balance);
 			console.log(transactions);
@@ -80,6 +180,10 @@ const loginKey = (fingerprint, index) => {
 			document.querySelector("#menu").style.display = "block";
 			switchPage("node");
 		}
+	}).catch((err) => {
+		setTimeout(() => {
+			loginKey(fingerprint, index);
+		}, 1000);
 	});
 }
 

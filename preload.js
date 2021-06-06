@@ -7,6 +7,7 @@ function Wallet() {
 		return new Promise(async (resolve, reject) => {
 			let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
 			ipcRenderer.on(`response-wallet-${token}`, (event, response) => resolve(response));
+			ipcRenderer.on(`response-wallet-${token}-err`, (event, response) => reject(response));
 			ipcRenderer.send("wallet", {
 				command,
 				args,
@@ -150,6 +151,7 @@ function Connections() {
 		return new Promise(async (resolve, reject) => {
 			let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
 			ipcRenderer.on(`response-connections-${token}`, (event, response) => resolve(response));
+			ipcRenderer.on(`response-connections-${token}-err`, (event, response) => reject(response));
 			ipcRenderer.send("connections", {
 				command,
 				args,
@@ -185,6 +187,7 @@ function FullNode() {
 		return new Promise(async (resolve, reject) => {
 			let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
 			ipcRenderer.on(`response-fullnode-${token}`, (event, response) => resolve(response));
+			ipcRenderer.on(`response-fullnode-${token}-err`, (event, response) => reject(response));
 			ipcRenderer.send("fullnode", {
 				command,
 				args,
@@ -254,6 +257,10 @@ function FullNode() {
 		return sendCommand("getAdditionsAndRemovals", {
 			hash
 		});
+	}
+
+	this.getNetworkInfo = () => {
+		return sendCommand("getNetworkInfo", {});
 	}
 
 	this.addressToPuzzleHash = (address) => {
@@ -405,6 +412,10 @@ const showKeys = () => {
 		}).join("");
 		document.querySelector("#loader").style.display = "none";
 		document.querySelector("#keys").style.display = "block";
+	}).catch((err) => {
+		setTimeout(() => {
+			showKeys();
+		}, 1000);
 	});
 }
 

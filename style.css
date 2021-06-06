@@ -401,3 +401,13 @@ html, body {
 	overflow-wrap: anywhere;
 	white-space: pre-wrap;
 }
+
+.half {
+	width: calc(50% - 3px);
+	display: inline-block;
+}
+
+p.half-margin {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
