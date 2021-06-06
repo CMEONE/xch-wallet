@@ -10,6 +10,7 @@
 
 :root {
 	--background: #373c46;
+	--background-lighter: #545b69;
 	--white: #efefef;
 	--green: #51d876;
 	--red: #ff0000;
@@ -55,7 +56,7 @@ html, body {
 }
 
 #loader > i {
-	font-size:  3em;
+	font-size: 3em;
 	margin-bottom: 25px;
 }
 
@@ -112,13 +113,13 @@ html, body {
 	font-size: 1.5em;
 	width: 390px;
 	white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 #keylist > .key-option > .options {
 	position: absolute;
-    text-align: center;
+	text-align: center;
 	z-index: 2;
 	margin: 0;
 	right: 15px;
@@ -127,7 +128,7 @@ html, body {
 }
 
 #keylist > .key-option > .options > i {
-	font-size:  1.5em;
+	font-size: 1.5em;
 	margin: 5px;
 }
 
@@ -410,4 +411,45 @@ html, body {
 p.half-margin {
 	margin-top: 10px;
 	margin-bottom: 10px;
+}
+
+.connections-table-container {
+	width: 100%;
+	box-shadow: var(--shadow-active);
+	overflow-x: auto;
+}
+
+.connections-table {
+	border-collapse: collapse;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: 0.8em;
+}
+.connections-table th.long > p, .connections-table td.long > p {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 5px;
+}
+.connections-table th.long, .connections-table td.long {
+	max-width: 100px;
+}
+
+.connections-table th, .connections-table td {
+	max-width: 75px;
+	white-space: pre-wrap;
+}
+
+.connections-table td, .connections-table th {
+	text-align: left;
+	padding: 10px;
+}
+
+.connections-table tr:nth-child(even) {
+	background-color: var(--background-lighter);
+}
+
+.connections-table i {
+	font-size: 1.5em;
+	cursor: pointer;
 }

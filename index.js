@@ -86,7 +86,7 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 	let vdfSubSlotIterations = (new Number(vdfSubSlotIterationsRaw)).toLocaleString();
 	let vdfTotalIterations = (new Number(vdfTotalIterationsRaw)).toLocaleString();
 
-	let prevBlockHeight = height - 1;
+	let prevBlockHeight = heightRaw - 1;
 	while(timeRaw == 0 && prevBlockHeight != 0) {
 		let prevBlock = await fullnode.getBlockRecordByHeight(prevBlockHeight);
 		if(prevBlock.success) {
@@ -117,11 +117,13 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 	let connected = "Not Connected"
 	let connectedColor = "red"
 
+	let allConnections = [];
 	if(connectionsList != null && connectionsList.success && connectionsList.connections != null) {
 		if(connectionsList.connections.filter(c => c.peer_host != "127.0.0.1").length > 0) {
 			connected = "Connected";
 			connectedColor = "green";
 		}
+		allConnections = connectionsList.connections;
 	}
 
 	document.querySelector("#node_title").innerHTML = `Full Node (${networkName || "mainnet"}):`;
@@ -146,6 +148,62 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 	<p class="half half-margin"><b>VDF Total Iterations: </b> ${vdfTotalIterations}</p>
 	`;
 
+	document.querySelector("#node_connections").innerHTML = `
+	<h3 class="action">Connections:</h3>
+	<div class="connections-table-container">
+		<table class="connections-table">
+			<tr>
+				<th class="long"><p>Node ID</p></th>
+				<th><p>IP Address</p></th>
+				<th><p>Port</p></th>
+				<th><p>MiB Up/Down</p></th>
+				<th><p>Connection Type</p></th>
+				<th><p>Height</p></th>
+				<th><p>Actions</p></th>
+			</tr>
+			${allConnections.map((conn) => {
+				const formatHeight = (h) => {
+					if(h == null) {
+						return "";
+					} else {
+						return (new Number(h)).toLocaleString();
+					}
+				}
+				const formatType = (t) => {
+					if(t == 1) {
+						return "Full Node";
+					} else if(t == 2) {
+						return "Harvester";
+					} else if(t == 3) {
+						return "Farmer";
+					} else if(t == 4) {
+						return "Timelord";
+					} else if(t == 4) {
+						return "Introducer";
+					} else if(t == 6) {
+						return "Wallet";
+					} else if(t == 7) {
+						return "Plotter";
+					} else {
+						return "Unknown"
+					}
+				}
+				return `
+				<tr>
+					<td class="long"><p>${conn.node_id}</p></td>
+					<td><p>${conn.peer_host}</p></td>
+					<td><p>${conn.peer_port}/${conn.peer_server_port}</p></td>
+					<td><p>${(conn.bytes_written / (1024 * 1024)).toFixed(1)}/${(conn.bytes_read / (1024 * 1024)).toFixed(1)}</p></td>
+					<td><p>${formatType(conn.type)}</p></td>
+					<td><p>${formatHeight(conn.peak_height)}</p></td>
+					<td><p><i class="fas fa-trash trash-btn" onclick="deleteNodeModal('${conn.node_id}', '${formatType(conn.type)}', '${conn.peer_host}');"></i></p></td>
+				</tr>
+				`;
+			}).join("")}
+		</table>
+	</div>
+	`
+
 	setTimeout(async () => {
 		if(page == "node") {
 			networkName = (await fullnode.getNetworkInfo()).network_name;
@@ -154,6 +212,29 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 		}
 		updateNodeInfo(networkName, blockchainState, connectionsList);
 	}, 10000);
+}
+
+const deleteNodeModal = (nodeId, type, ip) => {
+	createModal("Confirm Disconnect:", 
+		`<p>Are you sure you want to disconnect from the <b>${type}</b> at <b>${ip}</b>?</p>.`, [{
+			text: "Disconnect",
+			action: `deleteNode("${nodeId}")`,
+			color: "red"
+		}, {
+			text: "Cancel",
+			action: `closeModal()`,
+			color: "gray"
+		}]
+	);
+}
+
+const deleteNode = async (nodeId) => {
+	await connections.closeConnection(nodeId);
+	let networkName = (await fullnode.getNetworkInfo()).network_name;
+	let connectionsList = await connections.getConnections() || {};
+	let blockchainState = await fullnode.getBlockchainState() || {};
+	closeModal();
+	updateNodeInfo(networkName, blockchainState, connectionsList);
 }
 
 const loginKey = (fingerprint, index) => {
