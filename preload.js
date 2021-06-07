@@ -1,6 +1,6 @@
 const cli = require('child_process').exec;
 const fs = require('fs');
-const { ipcRenderer, contextBridge } = require('electron');
+const { ipcRenderer, contextBridge, clipboard } = require('electron');
 const { puzzle_hash_to_address, address_to_puzzle_hash } = require("chia-utils");
 
 function Wallet() {
@@ -102,6 +102,12 @@ function Wallet() {
 		return sendCommand("getTransactions", {
 			walletId,
 			limit
+		});
+	}
+
+	this.getAddress = (walletId) => {
+		return sendCommand("getAddress", {
+			walletId
 		});
 	}
 
@@ -394,6 +400,7 @@ const expose = () => {
 	contextBridge.exposeInMainWorld("chia", runChiaCommand);
 	contextBridge.exposeInMainWorld("puzzle_hash_to_address", puzzle_hash_to_address);
 	contextBridge.exposeInMainWorld("address_to_puzzle_hash", address_to_puzzle_hash);
+	contextBridge.exposeInMainWorld("copy", clipboard.writeText);
 }
 
 const showKeys = () => {

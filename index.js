@@ -317,6 +317,7 @@ const updateWalletInfo = async (wallets) => {
 			synced = "Syncing";
 		}
 		let balances = await wallet.getWalletBalance(walletId) || {};
+		let address = await wallet.getAddress(walletId) || "";
 		document.querySelector("#walletcontent").innerHTML = `
 		<h2 class="page-title">Wallet:</h2>
 		<div class="pane">
@@ -332,8 +333,32 @@ const updateWalletInfo = async (wallets) => {
 			<p class="one-third half-margin"><b>Pending Amount:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance - balances.confirmed_wallet_balance)}</p>
 			<p class="one-third half-margin"><b>Pending Change:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.pending_change)}</p>
 		</div>
+		<div class="pane">
+			<h3 class="action">Receive:</h3>
+			<p><b id="wallet_address">${address}</b></p>
+			<div class="left-container">
+				<button class="button background-white" onclick="copyAddress();">Copy</button>
+				<button class="button" style="margin-right: 0;" onclick="newAddress();">New Address</button>
+			</div>
+		</div>
 		`;
 	}
+}
+
+const newAddress = async () => {
+	await wallet.getNextAddress(walletId);
+	updateWalletInfo(await wallet.getWallets() || []);
+}
+
+const copyAddress = async () => {
+	copy(document.querySelector('#wallet_address').innerHTML);
+	createModal("Copied:", 
+		`<p>Your address has been copied to your clipboard.</p>`, [{
+			text: "Close",
+			action: `closeModal()`,
+			color: "gray"
+		}]
+	);
 }
 
 const switchWallet = async (w) => {

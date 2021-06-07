@@ -467,6 +467,10 @@ html, body {
 	background-color: var(--green);
 }
 
+.background-white {
+	background-color: var(--white);
+}
+
 #terminal {
 	width: 100%;
 	max-height: 600px;

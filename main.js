@@ -142,6 +142,12 @@ ipcMain.on("wallet", (event, params) => {
 		}).catch((err) => {
 			win.webContents.send(`response-wallet-${params.token}-err`, err);
 		});
+	} else if(params.command == "getAddress") {
+		wallet.getAddress(params.args.walletId).then((res) => {
+			win.webContents.send(`response-wallet-${params.token}`, res);
+		}).catch((err) => {
+			win.webContents.send(`response-wallet-${params.token}-err`, err);
+		});
 	} else if(params.command == "getNextAddress") {
 		wallet.getNextAddress(params.args.walletId).then((res) => {
 			win.webContents.send(`response-wallet-${params.token}`, res);
