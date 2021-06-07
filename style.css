@@ -14,6 +14,7 @@
 	--white: #efefef;
 	--green: #51d876;
 	--red: #ff0000;
+	--yellow: #ffff00;
 	--shadow: 0 0 26px 0 #000000;
 	--shadow-active: 0 0 16px 0 #000000;
 }
@@ -222,6 +223,7 @@ html, body {
 	left: 30px;
 	top: 30px;
 	width: 150px;
+	height: calc(100% - 60px);
 	max-height: calc(100% - 60px);
 	padding: 25px;
 	box-sizing: border-box;
@@ -280,6 +282,70 @@ html, body {
 	color: var(--background);
 }
 
+#walletlist {
+	position: absolute;
+	top: 30px;
+	left: 210px;
+	width: 250px;
+	height: calc(100% - 60px);
+	max-height: calc(100% - 60px);
+	padding: 25px;
+	box-sizing: border-box;
+	border-radius: 25px;
+	overflow-y: auto;
+	background-color: var(--background);
+	box-shadow: var(--shadow);
+}
+
+#walletlist > .wallet-option {
+	width: 200px;
+	padding: 10px;
+	padding-top: 30px;
+	padding-bottom: 30px;
+	margin-bottom: 25px;
+	box-sizing: border-box;
+	border-radius: 10px;
+	cursor: pointer;
+	background-color: var(--background);
+	box-shadow: var(--shadow);
+	transform: scale(1);
+	transition: transform 0.2s ease-in-out,
+				box-shadow 0.2s ease-in-out,
+				background-color 0.2s ease-in-out;
+}
+
+#walletlist > .wallet-option * {
+	transition: color 0.2s ease-in-out;
+}
+
+#walletlist > .wallet-option > p {
+	font-size: 1.05em;
+	text-align: center;
+	margin: 0;
+}
+
+#walletlist > .wallet-option:hover {
+	transform: scale(1.05);
+}
+
+#walletlist > .wallet-option:active {
+	transform: scale(0.98);
+	box-shadow: var(--shadow-active);
+}
+
+#walletlist > .wallet-option.wallet-option-active {
+	background-color: var(--green);
+}
+
+#walletlist > .wallet-option.wallet-option-active * {
+	color: var(--background);
+}
+
+#walletcontent {
+	margin-left: 280px;
+	width: calc(100% - 280px);
+}
+
 .page {
 	margin-left: 210px;
 	margin-top: 45px;
@@ -287,7 +353,7 @@ html, body {
 	padding-bottom: 45px;
 }
 
-.page > .notice {
+.page .notice {
 	position: absolute;
 	left: 50%;
 	top: 45px;
@@ -296,7 +362,7 @@ html, body {
 	font-size: 1.5em;
 }
 
-.page > .page-title {
+.page .page-title {
 	margin: 0;
 	font-size: 2.5em;
 	text-align: left;

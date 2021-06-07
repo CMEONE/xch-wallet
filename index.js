@@ -59,12 +59,28 @@ const deletePrivKey = (fingerprint) => {
 let page = "";
 let key;
 let keyindex;
+let walletId = 1;
 
 const formatNumber = (num) => {
 	if(num == null) {
 		return "";
 	} else {
 		return (new Number(num)).toLocaleString();
+	}
+}
+
+const formatBalance = (bal) => {
+	if(bal == null) {
+		return "";
+	} else {
+		let fixed = (bal / ONE_TRILLION).toFixed(12);
+		while(fixed[fixed.length - 1] == "0") {
+			fixed = fixed.substring(0, fixed.length - 1);
+		}
+		if(fixed[fixed.length - 1] == ".") {
+			fixed = fixed.substring(0, fixed.length - 1);
+		}
+		return fixed + " XCH";
 	}
 }
 
@@ -99,182 +115,230 @@ const formatTime = (t) => {
 let heightRaw = 0;
 
 const updateNodeInfo = async (networkName, blockchainState, connectionsList) => {
-	let synced = "Not Synced"
-	let syncedColor = "red"
-	let timeRaw = 0;
-	let spaceRaw = 0;
-	let difficultyRaw = 0;
-	let vdfSubSlotIterationsRaw = 0;
-	let vdfTotalIterationsRaw = 0;
+	if(page == "node" && document.querySelector("#menu").style.display != "none") {
+		let synced = "Not Synced"
+		let syncedColor = "red"
+		let timeRaw = 0;
+		let spaceRaw = 0;
+		let difficultyRaw = 0;
+		let vdfSubSlotIterationsRaw = 0;
+		let vdfTotalIterationsRaw = 0;
 
-	if(blockchainState != null && blockchainState.success && blockchainState.blockchain_state != null) {
-		if(blockchainState.blockchain_state.sync.synced) {
-			synced = "Synced";
-			syncedColor = "green";
+		if(blockchainState != null && blockchainState.success && blockchainState.blockchain_state != null) {
+			if(blockchainState.blockchain_state.sync.synced) {
+				synced = "Synced";
+				syncedColor = "green";
+			}
+			heightRaw = blockchainState.blockchain_state.peak.height;
+			timeRaw = blockchainState.blockchain_state.peak.timestamp || 0;
+			spaceRaw = blockchainState.blockchain_state.space || 0;
+			difficultyRaw = blockchainState.blockchain_state.difficulty || 0;
+			vdfSubSlotIterationsRaw = blockchainState.blockchain_state.peak.sub_slot_iters || 0;
+			vdfTotalIterationsRaw = blockchainState.blockchain_state.peak.total_iters || 0;
 		}
-		heightRaw = blockchainState.blockchain_state.peak.height;
-		timeRaw = blockchainState.blockchain_state.peak.timestamp || 0;
-		spaceRaw = blockchainState.blockchain_state.space || 0;
-		difficultyRaw = blockchainState.blockchain_state.difficulty || 0;
-		vdfSubSlotIterationsRaw = blockchainState.blockchain_state.peak.sub_slot_iters || 0;
-		vdfTotalIterationsRaw = blockchainState.blockchain_state.peak.total_iters || 0;
-	}
 
-	let height = (new Number(heightRaw)).toLocaleString();
-	let difficulty = (new Number(difficultyRaw)).toLocaleString();
-	let vdfSubSlotIterations = (new Number(vdfSubSlotIterationsRaw)).toLocaleString();
-	let vdfTotalIterations = (new Number(vdfTotalIterationsRaw)).toLocaleString();
+		let height = (new Number(heightRaw)).toLocaleString();
+		let difficulty = (new Number(difficultyRaw)).toLocaleString();
+		let vdfSubSlotIterations = (new Number(vdfSubSlotIterationsRaw)).toLocaleString();
+		let vdfTotalIterations = (new Number(vdfTotalIterationsRaw)).toLocaleString();
 
-	let prevBlockHeight = heightRaw - 1;
-	while(timeRaw == 0 && prevBlockHeight != 0) {
-		let prevBlock = await fullnode.getBlockRecordByHeight(prevBlockHeight);
-		if(prevBlock.success) {
-			timeRaw = prevBlock.block_record.timestamp || 0;
+		let prevBlockHeight = heightRaw - 1;
+		while(timeRaw == 0 && prevBlockHeight != 0) {
+			let prevBlock = await fullnode.getBlockRecordByHeight(prevBlockHeight);
+			if(prevBlock.success) {
+				timeRaw = prevBlock.block_record.timestamp || 0;
+			}
+			prevBlockHeight -= 1;
 		}
-		prevBlockHeight -= 1;
-	}
 
-	prevBlockHeight = heightRaw;
-	let blocks = [];
-	let unfinished = await fullnode.getUnfinishedBlockHeaders();
-	if(unfinished.success) {
-		for(let i = 0; i < unfinished.headers.length; i++) {
-			blocks.push({
-				header_hash: unfinished.headers[i].foliage.foliage_transaction_block_hash,
-				timestamp: unfinished.headers[i].foliage_transaction_block.timestamp,
-				is_finished_state: "Unfinished"
-			});
+		prevBlockHeight = heightRaw;
+		let blocks = [];
+		let unfinished = await fullnode.getUnfinishedBlockHeaders();
+		if(unfinished.success) {
+			for(let i = 0; i < unfinished.headers.length; i++) {
+				blocks.push({
+					header_hash: unfinished.headers[i].foliage.foliage_transaction_block_hash,
+					timestamp: unfinished.headers[i].foliage_transaction_block.timestamp,
+					is_finished_state: "Unfinished"
+				});
+			}
 		}
-	}
-	for(let i = 0; i < 10; i++) {
-		let block = await fullnode.getBlockRecordByHeight(prevBlockHeight - i);
-		if(block.success) {
-			blocks.push({
-				...block.block_record,
-				is_finished_state: "Finished"
-			});
+		for(let i = 0; i < 10; i++) {
+			let block = await fullnode.getBlockRecordByHeight(prevBlockHeight - i);
+			if(block.success) {
+				blocks.push({
+					...block.block_record,
+					is_finished_state: "Finished"
+				});
+			}
 		}
-	}
 
-	let time = (new Date(timeRaw * 1000)).toLocaleString();
+		let time = (new Date(timeRaw * 1000)).toLocaleString();
 
-	let space = "0 GiB";
-	if(spaceRaw >= 1024 * 1024 * 1024 * 1024 * 1024 * 1024) {
-		space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024 * 1024 * 1024)).toFixed(3)} EiB`;
-	} else if(spaceRaw >= 1024 * 1024 * 1024 * 1024 * 1024) {
-		space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024 * 1024)).toFixed(3)} PiB`;
-	} else if(spaceRaw >= 1024 * 1024 * 1024 * 1024) {
-		space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024)).toFixed(3)} TiB`;
-	} else if(spaceRaw >= 1024 * 1024 * 1024) {
-		space = `${(spaceRaw / (1024 * 1024 * 1024)).toFixed(3)} GiB`;
-	} else if(spaceRaw >= 1024 * 1024) {
-		space = `${(spaceRaw / (1024 * 1024)).toFixed(3)} MiB`;
-	} else if(spaceRaw >= 1024) {
-		space = `${(spaceRaw / 1024).toFixed(3)} KiB`;
-	} else {
-		space = `${spaceRaw.toFixed(3)} B`;
-	}
-
-	let connected = "Not Connected"
-	let connectedColor = "red"
-
-	let allConnections = [];
-	if(connectionsList != null && connectionsList.success && connectionsList.connections != null) {
-		if(connectionsList.connections.filter(c => c.peer_host != "127.0.0.1").length > 0) {
-			connected = "Connected";
-			connectedColor = "green";
+		let space = "0 GiB";
+		if(spaceRaw >= 1024 * 1024 * 1024 * 1024 * 1024 * 1024) {
+			space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024 * 1024 * 1024)).toFixed(3)} EiB`;
+		} else if(spaceRaw >= 1024 * 1024 * 1024 * 1024 * 1024) {
+			space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024 * 1024)).toFixed(3)} PiB`;
+		} else if(spaceRaw >= 1024 * 1024 * 1024 * 1024) {
+			space = `${(spaceRaw / (1024 * 1024 * 1024 * 1024)).toFixed(3)} TiB`;
+		} else if(spaceRaw >= 1024 * 1024 * 1024) {
+			space = `${(spaceRaw / (1024 * 1024 * 1024)).toFixed(3)} GiB`;
+		} else if(spaceRaw >= 1024 * 1024) {
+			space = `${(spaceRaw / (1024 * 1024)).toFixed(3)} MiB`;
+		} else if(spaceRaw >= 1024) {
+			space = `${(spaceRaw / 1024).toFixed(3)} KiB`;
+		} else {
+			space = `${spaceRaw.toFixed(3)} B`;
 		}
-		allConnections = connectionsList.connections;
-	}
 
-	document.querySelector("#node_title").innerHTML = `Full Node (${networkName || "mainnet"}):`;
+		let connected = "Not Connected"
+		let connectedColor = "red"
 
-	document.querySelector("#node_status").innerHTML = `
-	<h3 class="action">Status:</h3>
-	<p class="half half-margin"><b>Blockchain Status: </b> <span class="${syncedColor}">${synced}</span></p>
-	<p class="half half-margin"><b>Connection Status: </b> <span class="${connectedColor}">${connected}</span></p>
-	`;
+		let allConnections = [];
+		if(connectionsList != null && connectionsList.success && connectionsList.connections != null) {
+			if(connectionsList.connections.filter(c => c.peer_host != "127.0.0.1").length > 0) {
+				connected = "Connected";
+				connectedColor = "green";
+			}
+			allConnections = connectionsList.connections;
+		}
 
-	document.querySelector("#node_peak").innerHTML = `
-	<h3 class="action">Peak:</h3>
-	<p class="half half-margin"><b>Height: </b> ${height}</p>
-	<p class="half half-margin"><b>Time: </b> ${time}</p>
-	`;
+		document.querySelector("#node_title").innerHTML = `Full Node (${networkName || "mainnet"}):`;
 
-	document.querySelector("#node_stats").innerHTML = `
-	<h3 class="action">Stats:</h3>
-	<p class="half half-margin"><b>Estimated Network Space: </b> ${space}</p>
-	<p class="half half-margin"><b>Difficulty: </b> ${difficulty}</p>
-	<p class="half half-margin"><b>VDF Sub Slot Iterations: </b> ${vdfSubSlotIterations}</p>
-	<p class="half half-margin"><b>VDF Total Iterations: </b> ${vdfTotalIterations}</p>
-	`;
+		document.querySelector("#node_status").innerHTML = `
+		<h3 class="action">Status:</h3>
+		<p class="half half-margin"><b>Blockchain Status: </b> <span class="${syncedColor}">${synced}</span></p>
+		<p class="half half-margin"><b>Connection Status: </b> <span class="${connectedColor}">${connected}</span></p>
+		`;
 
-	document.querySelector("#node_connections").innerHTML = `
-	<h3 class="action">Connections:</h3>
-	<div class="node-table-container">
-		<table class="node-table">
-			<tr>
-				<th class="long"><p>Node ID</p></th>
-				<th><p>IP Address</p></th>
-				<th><p>Port</p></th>
-				<th><p>MiB Up/Down</p></th>
-				<th><p>Connection Type</p></th>
-				<th><p>Height</p></th>
-				<th><p>Actions</p></th>
-			</tr>
-			${allConnections.map((conn) => {
-				return `
+		document.querySelector("#node_peak").innerHTML = `
+		<h3 class="action">Peak:</h3>
+		<p class="half half-margin"><b>Height: </b> ${height}</p>
+		<p class="half half-margin"><b>Time: </b> ${time}</p>
+		`;
+
+		document.querySelector("#node_stats").innerHTML = `
+		<h3 class="action">Stats:</h3>
+		<p class="half half-margin"><b>Estimated Network Space: </b> ${space}</p>
+		<p class="half half-margin"><b>Difficulty: </b> ${difficulty}</p>
+		<p class="half half-margin"><b>VDF Sub Slot Iterations: </b> ${vdfSubSlotIterations}</p>
+		<p class="half half-margin"><b>VDF Total Iterations: </b> ${vdfTotalIterations}</p>
+		`;
+
+		document.querySelector("#node_connections").innerHTML = `
+		<h3 class="action">Connections:</h3>
+		<div class="node-table-container">
+			<table class="node-table">
 				<tr>
-					<td class="long"><p>${conn.node_id}</p></td>
-					<td><p>${conn.peer_host}</p></td>
-					<td><p>${conn.peer_port}/${conn.peer_server_port}</p></td>
-					<td><p>${(conn.bytes_written / (1024 * 1024)).toFixed(1)}/${(conn.bytes_read / (1024 * 1024)).toFixed(1)}</p></td>
-					<td><p>${formatType(conn.type)}</p></td>
-					<td><p>${formatNumber(conn.peak_height)}</p></td>
-					<td><p><i class="fas fa-trash trash-btn" onclick="deleteNodeModal('${conn.node_id}', '${formatType(conn.type)}', '${conn.peer_host}');"></i></p></td>
+					<th class="long"><p>Node ID</p></th>
+					<th><p>IP Address</p></th>
+					<th><p>Port</p></th>
+					<th><p>MiB Up/Down</p></th>
+					<th><p>Connection Type</p></th>
+					<th><p>Height</p></th>
+					<th><p>Actions</p></th>
 				</tr>
-				`;
-			}).join("")}
-		</table>
-	</div>
-	`
+				${allConnections.map((conn) => {
+					return `
+					<tr>
+						<td class="long"><p>${conn.node_id}</p></td>
+						<td><p>${conn.peer_host}</p></td>
+						<td><p>${conn.peer_port}/${conn.peer_server_port}</p></td>
+						<td><p>${(conn.bytes_written / (1024 * 1024)).toFixed(1)}/${(conn.bytes_read / (1024 * 1024)).toFixed(1)}</p></td>
+						<td><p>${formatType(conn.type)}</p></td>
+						<td><p>${formatNumber(conn.peak_height)}</p></td>
+						<td><p><i class="fas fa-trash trash-btn" onclick="deleteNodeModal('${conn.node_id}', '${formatType(conn.type)}', '${conn.peer_host}');"></i></p></td>
+					</tr>
+					`;
+				}).join("")}
+			</table>
+		</div>
+		`
 
-	document.querySelector("#node_blocks").innerHTML = `
-	<h3 class="action">Blocks:</h3>
-	<div class="node-table-container">
-		<table class="node-table">
-			<tr>
-				<th class="long"><p>Header Hash</p></th>
-				<th><p>Height</p></th>
-				<th><p>Time Created</p></th>
-				<th><p>State</p></th>
-			</tr>
-			${blocks.map((block) => {
-				let onclickData = "";
-				if(block.is_finished_state == "Finished") {
-					onclickData = ` onclick="switchPage('block', ${block.height});"`
-				}
-				return `
-				<tr${onclickData}>
-					<td class="long"><p>${block.header_hash}</p></td>
-					<td><p>${formatNumber(block.height)}</p></td>
-					<td><p>${formatTime(block.timestamp)}</p></td>
-					<td><p>${block.is_finished_state}</p></td>
+		document.querySelector("#node_blocks").innerHTML = `
+		<h3 class="action">Blocks:</h3>
+		<div class="node-table-container">
+			<table class="node-table">
+				<tr>
+					<th class="long"><p>Header Hash</p></th>
+					<th><p>Height</p></th>
+					<th><p>Time Created</p></th>
+					<th><p>State</p></th>
 				</tr>
-				`;
-			}).join("")}
-		</table>
-	</div>
-	`
+				${blocks.map((block) => {
+					let onclickData = "";
+					if(block.is_finished_state == "Finished") {
+						onclickData = ` onclick="switchPage('block', ${block.height});"`
+					}
+					return `
+					<tr${onclickData}>
+						<td class="long"><p>${block.header_hash}</p></td>
+						<td><p>${formatNumber(block.height)}</p></td>
+						<td><p>${formatTime(block.timestamp)}</p></td>
+						<td><p>${block.is_finished_state}</p></td>
+					</tr>
+					`;
+				}).join("")}
+			</table>
+		</div>
+		`
+	}
+}
 
-	setTimeout(async () => {
-		if(page == "node") {
-			networkName = (await fullnode.getNetworkInfo()).network_name;
-			connectionsList = await connections.getConnections() || {};
-			blockchainState = await fullnode.getBlockchainState() || {};
+const updateWalletInfo = async (wallets) => {
+	if(page == "wallet" && document.querySelector("#menu").style.display != "none") {
+		document.querySelector("#walletlist").innerHTML = `
+		${wallets.map((w, index) => {
+			let styling = ``;
+			if(index == wallets.length - 1) {
+				styling = ` style="margin-bottom: 0;"`;
+			}
+			let classes = "";
+			if(w.id == walletId) {
+				classes = " wallet-option-active";
+			}
+			return `
+			<div class="wallet-option${classes}"${styling} onclick="switchWallet(${w.id});">
+				<p>${w.name}</p>
+			</div>
+			`
+		}).join("")}`;
+		let syncedColor = "red";
+		let synced = "Not Synced";
+		let walletHeight = await wallet.getHeightInfo() || 0;
+		let syncing = await wallet.getSyncStatus();
+		let fullNodeState = await fullnode.getBlockchainState() || {};
+		if((fullNodeState.success && fullNodeState.blockchain_state != null && fullNodeState.blockchain_state.sync.synced) && walletHeight + 10 > heightRaw) {
+			syncedColor = "green";
+			synced = "Synced";
+		} else if(syncing) {
+			syncedColor = "yellow";
+			synced = "Syncing";
 		}
-		updateNodeInfo(networkName, blockchainState, connectionsList);
-	}, 10000);
+		let balances = await wallet.getWalletBalance(walletId) || {};
+		document.querySelector("#walletcontent").innerHTML = `
+		<h2 class="page-title">Wallet:</h2>
+		<div class="pane">
+			<h3 class="action">Status:</h3>
+			<p class="half half-margin"><b>Sync Status: </b> <span class="${syncedColor}">${synced}</span></p>
+			<p class="half half-margin"><b>Height: </b> ${formatNumber(walletHeight)}</p>
+		</div>
+		<div class="pane">
+			<h3 class="action">Balance:</h3>
+			<p class="one-third half-margin"><b>Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.confirmed_wallet_balance)}</p>
+			<p class="one-third half-margin"><b>Spendable Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.spendable_balance)}</p>
+			<p class="one-third half-margin"><b>Pending Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance)}</p>
+			<p class="one-third half-margin"><b>Pending Amount:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance - balances.confirmed_wallet_balance)}</p>
+			<p class="one-third half-margin"><b>Pending Change:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.pending_change)}</p>
+		</div>
+		`;
+	}
+}
+
+const switchWallet = async (w) => {
+	walletId = w;
+	updateWalletInfo(await wallet.getWallets() || []);
 }
 
 const deleteNodeModal = (nodeId, type, ip) => {
@@ -300,6 +364,9 @@ const deleteNode = async (nodeId) => {
 	updateNodeInfo(networkName, blockchainState, connectionsList);
 }
 
+let nodeInterval;
+let walletInterval;
+
 const loginKey = (fingerprint, index) => {
 	document.querySelector("#overlay").style.display = "block";
 	document.querySelector("#loader > h3").innerHTML = `Logging into Wallet...`;
@@ -313,8 +380,25 @@ const loginKey = (fingerprint, index) => {
 			let transactions = await wallet.getTransactions(1, 100) || [];
 			let connectionsList = await connections.getConnections() || {};
 			let blockchainState = await fullnode.getBlockchainState() || {};
-			let networkName = (await fullnode.getNetworkInfo()).network_name;
-			updateNodeInfo(networkName, blockchainState, connectionsList);
+			let networkName = (await fullnode.getNetworkInfo() || {}).network_name || "mainnet";
+			if(nodeInterval == null) {
+				nodeInterval = setInterval(async () => {
+					if(page == "node" && document.querySelector("#menu").style.display != "none") {
+						let networkName = (await fullnode.getNetworkInfo() || {}).network_name || "mainnet";
+						let connectionsList = await connections.getConnections() || {};
+						let blockchainState = await fullnode.getBlockchainState() || {};
+						updateNodeInfo(networkName, blockchainState, connectionsList);
+					}
+				}, 10000);
+			}
+			if(walletInterval == null) {
+				walletInterval = setInterval(async () => {
+					if(page == "wallet" && document.querySelector("#menu").style.display != "none") {
+						let wallets = await wallet.getWallets() || [];
+						updateWalletInfo(wallets);
+					}
+				}, 10000);
+			}
 			console.log(wallets);
 			console.log(balance);
 			console.log(transactions);
@@ -335,7 +419,6 @@ const showBlockInfo = async (height) => {
 	document.querySelector("#block_title").innerHTML = `Block ${(new Number(height)).toLocaleString()}:`;
 	document.querySelector("#block_info").innerHTML = ``;
 	let block = await fullnode.getBlockRecordByHeight(height);
-	console.log(block);
 	if(block.success) {
 		let record = block.block_record;
 		let blockPreData = await fullnode.getBlock(record.header_hash);
@@ -414,16 +497,16 @@ const showBlockInfo = async (height) => {
 			<p class="three-fourths right-align">${additions.length}</p>
 			<hr>
 			<p class="one-fourth"><b>Total Additions Amount:</b></p>
-			<p class="three-fourths right-align">${(additionsAmount / ONE_TRILLION).toFixed(12)} XCH</p>
+			<p class="three-fourths right-align">${formatBalance(additionsAmount)}</p>
 			<hr>
 			<p class="one-fourth"><b>Number of Removals:</b></p>
 			<p class="three-fourths right-align">${removals.length}</p>
 			<hr>
 			<p class="one-fourth"><b>Total Removals Amount:</b></p>
-			<p class="three-fourths right-align">${(removalsAmount / ONE_TRILLION).toFixed(12)} XCH</p>
+			<p class="three-fourths right-align">${formatBalance(removalsAmount)}</p>
 			<hr>
 			<p class="one-fourth"><b>Fees Amount:</b></p>
-			<p class="three-fourths right-align">${(record.fees / ONE_TRILLION).toFixed(12)} XCH</p>
+			<p class="three-fourths right-align">${formatBalance(record.fees)}</p>
 			<hr>
 			<div class="center-container">${prevNext}</div>
 			`;
@@ -443,7 +526,7 @@ const showBlockInfo = async (height) => {
 }
 
 
-const switchPage = (pageName, data) => {
+const switchPage = async (pageName, data) => {
 	if(page != pageName) {
 		page = pageName;
 		hideAll(false);
@@ -455,14 +538,23 @@ const switchPage = (pageName, data) => {
 			document.querySelector(`#menuitem_${pageName}`).classList.add("menu-item-active");
 		}
 	}
-	if(pageName == "settings") {
+	if(pageName == "node") {
+		let networkName = (await fullnode.getNetworkInfo() || {}).network_name || "mainnet";
+		let connectionsList = await connections.getConnections() || {};
+		let blockchainState = await fullnode.getBlockchainState() || {};
+		updateNodeInfo(networkName, blockchainState, connectionsList);
+	} else if(pageName == "wallet") {
+		let wallets = await wallet.getWallets() || [];
+		updateWalletInfo(wallets);
+	} else if(pageName == "block") {
+		await showBlockInfo(data);
+	} else if(pageName == "settings") {
 		document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
 		if(document.querySelectorAll("#terminal > code").length == 1) {
 			runCommand("-h");
 		}
-	} else if(pageName == "block") {
-		showBlockInfo(data);
 	}
+	hideAll(false);
 	document.querySelector(`#page_${pageName}`).style.display = "block";
 }
 
