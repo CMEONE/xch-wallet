@@ -341,7 +341,7 @@ html, body {
 	outline: none;
 }
 
-.button-left {
+.button {
 	font-size: 1.35em;
 	padding: 10px;
 	padding-left: 20px;
@@ -354,33 +354,51 @@ html, body {
 	border-radius: 10px;
 	box-shadow: var(--shadow);
 	margin: 10px;
-	margin-right: 0;
-	margin-left: 100%;
-	transform: translate(-100%, 0) scale(1);
+	transform: scale(1);
 	transition: transform 0.2s ease-in-out,
 				box-shadow 0.2s ease-in-out;
 }
 
-.button-left:hover {
-	transform: translate(-100%, 0) scale(1.05);
+.button:hover {
+	transform: scale(1.05);
 }
 
-.button-left:active {
-	transform: translate(-100%, 0) scale(0.98);
+.button:active {
+	transform: scale(0.98);
 	box-shadow: var(--shadow-active);
 	outline: none;
 }
 
-.button-left:focus {
+.button:focus {
 	outline: none;
+}
+
+.left-container {
+	width: max-content;
+	margin-left: 100%;
+	transform: translate(-100%, 0);
+}
+
+.center-container {
+	width: max-content;
+	margin-left: 50%;
+	transform: translate(-50%, 0);
 }
 
 .red, .red * {
 	color: var(--red);
 }
 
+.background-red {
+	background-color: var(--red);
+}
+
 .green, .green * {
 	color: var(--green);
+}
+
+.background-green {
+	background-color: var(--green);
 }
 
 #terminal {
@@ -406,6 +424,35 @@ html, body {
 .half {
 	width: calc(50% - 3px);
 	display: inline-block;
+	overflow-wrap: anywhere;
+}
+
+.one-third {
+	width: calc(33% - 3px);
+	display: inline-block;
+	overflow-wrap: anywhere;
+}
+
+.two-thirds {
+	width: calc(66% - 3px);
+	display: inline-block;
+	overflow-wrap: anywhere;
+}
+
+.one-fourth {
+	width: calc(25% - 3px);
+	display: inline-block;
+	overflow-wrap: anywhere;
+}
+
+.three-fourths {
+	width: calc(75% - 3px);
+	display: inline-block;
+	overflow-wrap: anywhere;
+}
+
+.right-align {
+	text-align: right;
 }
 
 p.half-margin {
@@ -452,4 +499,12 @@ p.half-margin {
 .node-table i {
 	font-size: 1.5em;
 	cursor: pointer;
+}
+
+#block_info p {
+	font-size: 0.7em;
+}
+
+#block_info b {
+	font-size: 1.2em;
 }

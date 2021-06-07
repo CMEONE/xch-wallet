@@ -1,6 +1,7 @@
 const cli = require('child_process').exec;
 const fs = require('fs');
 const { ipcRenderer, contextBridge } = require('electron');
+const { puzzle_hash_to_address, address_to_puzzle_hash } = require("chia-utils");
 
 function Wallet() {
 	const sendCommand = (command, args) => {
@@ -310,7 +311,7 @@ const connections = new Connections();
 const fullnode = new FullNode();
 
 const hideAll = (hideMenu = true, hideLoader = true) => {
-	let elements = ["#keys", "#modal", "#page_node", "#page_wallet", "#page_plots", "#page_farm", "#page_apps", "#page_settings"];
+	let elements = ["#keys", "#modal", "#page_node", "#page_block", "#page_wallet", "#page_plots", "#page_farm", "#page_apps", "#page_settings"];
 	for(let i = 0; i < elements.length; i++) {
 		document.querySelector(`${elements[i]}`).style.display = "none";
 	}
@@ -391,6 +392,8 @@ const expose = () => {
 	contextBridge.exposeInMainWorld("setKeySettings", setKeySettings);
 	contextBridge.exposeInMainWorld("getKeyName", getKeyName);
 	contextBridge.exposeInMainWorld("chia", runChiaCommand);
+	contextBridge.exposeInMainWorld("puzzle_hash_to_address", puzzle_hash_to_address);
+	contextBridge.exposeInMainWorld("address_to_puzzle_hash", address_to_puzzle_hash);
 }
 
 const showKeys = () => {

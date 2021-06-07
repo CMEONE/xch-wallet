@@ -1,3 +1,5 @@
+const ONE_TRILLION = 1000000000000;
+
 const createModal = (title, description, options) => {
 	document.querySelector("#modal > .modal-title").innerHTML = title;
 	document.querySelector("#modal > .modal-text").innerHTML = description;
@@ -58,10 +60,47 @@ let page = "";
 let key;
 let keyindex;
 
+const formatNumber = (num) => {
+	if(num == null) {
+		return "";
+	} else {
+		return (new Number(num)).toLocaleString();
+	}
+}
+
+const formatType = (t) => {
+	if(t == 1) {
+		return "Full Node";
+	} else if(t == 2) {
+		return "Harvester";
+	} else if(t == 3) {
+		return "Farmer";
+	} else if(t == 4) {
+		return "Timelord";
+	} else if(t == 4) {
+		return "Introducer";
+	} else if(t == 6) {
+		return "Wallet";
+	} else if(t == 7) {
+		return "Plotter";
+	} else {
+		return "Unknown"
+	}
+}
+
+const formatTime = (t) => {
+	if(t == null) {
+		return "";
+	} else {
+		return (new Date(t * 1000)).toLocaleString();
+	}
+}
+
+let heightRaw = 0;
+
 const updateNodeInfo = async (networkName, blockchainState, connectionsList) => {
 	let synced = "Not Synced"
 	let syncedColor = "red"
-	let heightRaw = 0;
 	let timeRaw = 0;
 	let spaceRaw = 0;
 	let difficultyRaw = 0;
@@ -184,32 +223,6 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 				<th><p>Actions</p></th>
 			</tr>
 			${allConnections.map((conn) => {
-				const formatHeight = (h) => {
-					if(h == null) {
-						return "";
-					} else {
-						return (new Number(h)).toLocaleString();
-					}
-				}
-				const formatType = (t) => {
-					if(t == 1) {
-						return "Full Node";
-					} else if(t == 2) {
-						return "Harvester";
-					} else if(t == 3) {
-						return "Farmer";
-					} else if(t == 4) {
-						return "Timelord";
-					} else if(t == 4) {
-						return "Introducer";
-					} else if(t == 6) {
-						return "Wallet";
-					} else if(t == 7) {
-						return "Plotter";
-					} else {
-						return "Unknown"
-					}
-				}
 				return `
 				<tr>
 					<td class="long"><p>${conn.node_id}</p></td>
@@ -217,7 +230,7 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 					<td><p>${conn.peer_port}/${conn.peer_server_port}</p></td>
 					<td><p>${(conn.bytes_written / (1024 * 1024)).toFixed(1)}/${(conn.bytes_read / (1024 * 1024)).toFixed(1)}</p></td>
 					<td><p>${formatType(conn.type)}</p></td>
-					<td><p>${formatHeight(conn.peak_height)}</p></td>
+					<td><p>${formatNumber(conn.peak_height)}</p></td>
 					<td><p><i class="fas fa-trash trash-btn" onclick="deleteNodeModal('${conn.node_id}', '${formatType(conn.type)}', '${conn.peer_host}');"></i></p></td>
 				</tr>
 				`;
@@ -237,24 +250,14 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 				<th><p>State</p></th>
 			</tr>
 			${blocks.map((block) => {
-				const formatHeight = (h) => {
-					if(h == null) {
-						return "";
-					} else {
-						return (new Number(h)).toLocaleString();
-					}
-				}
-				const formatTime = (t) => {
-					if(t == null) {
-						return "";
-					} else {
-						return (new Date(t * 1000)).toLocaleString();
-					}
+				let onclickData = "";
+				if(block.is_finished_state == "Finished") {
+					onclickData = ` onclick="switchPage('block', ${block.height});"`
 				}
 				return `
-				<tr>
+				<tr${onclickData}>
 					<td class="long"><p>${block.header_hash}</p></td>
-					<td><p>${formatHeight(block.height)}</p></td>
+					<td><p>${formatNumber(block.height)}</p></td>
 					<td><p>${formatTime(block.timestamp)}</p></td>
 					<td><p>${block.is_finished_state}</p></td>
 				</tr>
@@ -328,8 +331,119 @@ const loginKey = (fingerprint, index) => {
 	});
 }
 
+const showBlockInfo = async (height) => {
+	document.querySelector("#block_title").innerHTML = `Block ${(new Number(height)).toLocaleString()}:`;
+	document.querySelector("#block_info").innerHTML = ``;
+	let block = await fullnode.getBlockRecordByHeight(height);
+	console.log(block);
+	if(block.success) {
+		let record = block.block_record;
+		let blockPreData = await fullnode.getBlock(record.header_hash);
+		if(blockPreData.success) {
+			let blockData = blockPreData.block;
+			let additions = [];
+			let removals = [];
+			let additionsAmount = 0;
+			let removalsAmount = 0;
+			let additionsAndRemovals = await fullnode.getAdditionsAndRemovals(record.header_hash);
+			if(additionsAndRemovals.success) {
+				additions = additionsAndRemovals.additions;
+				removals = additionsAndRemovals.removals;
+			}
+			for(let i = 0; i < additions.length; i++) {
+				additionsAmount += additions[i].coin.amount;
+			}
+			for(let i = 0; i < removals.length; i++) {
+				removalsAmount += removals[i].coin.amount;
+			}
+			let prevNext = ``;
+			if(height > 0) {
+				prevNext += `<button class="button" onclick="showBlockInfo(${height - 1})">&lt; Previous Block</button>`;
+			}
+			if(height < heightRaw) {
+				prevNext += `<button class="button" onclick="showBlockInfo(${height + 1})">Next Block &gt;</button>`;
+			}
+			document.querySelector("#block_info").innerHTML = `
+			<h3 class="action">Block Info:</h3>
+			<p class="one-fourth"><b>Header Hash:</b></p>
+			<p class="three-fourths right-align">${record.header_hash}</p>
+			<hr>
+			<p class="one-fourth"><b>Timestamp:</b></p>
+			<p class="three-fourths right-align">${formatTime(record.timestamp)}</p>
+			<hr>
+			<p class="one-fourth"><b>Height:</b></p>
+			<p class="three-fourths right-align">${formatNumber(record.height)}</p>
+			<hr>
+			<p class="one-fourth"><b>Weight:</b></p>
+			<p class="three-fourths right-align">${formatNumber(record.weight)}</p>
+			<hr>
+			<p class="one-fourth"><b>Previous Header Hash:</b></p>
+			<p class="three-fourths right-align">${record.prev_hash}</p>
+			<hr>
+			<p class="one-fourth"><b>Total VDF Iterations:</b></p>
+			<p class="three-fourths right-align">${formatNumber(record.total_iters)}</p>
+			<hr>
+			<p class="one-fourth"><b>Block VDF Iterations:</b></p>
+			<p class="three-fourths right-align">${formatNumber(blockData.reward_chain_block.challenge_chain_ip_vdf.number_of_iterations)}</p>
+			<hr>
+			<p class="one-fourth"><b>Proof of Space Size:</b></p>
+			<p class="three-fourths right-align">${formatNumber(blockData.reward_chain_block.proof_of_space.size)}</p>
+			<hr>
+			<p class="one-fourth"><b>Plot Public Key:</b></p>
+			<p class="three-fourths right-align">${blockData.reward_chain_block.proof_of_space.plot_public_key}</p>
+			<hr>
+			<p class="one-fourth"><b>Pool Public Key:</b></p>
+			<p class="three-fourths right-align">${blockData.reward_chain_block.proof_of_space.pool_public_key}</p>
+			<hr>
+			<p class="one-fourth"><b>Farmer Puzzle Hash:</b></p>
+			<p class="three-fourths right-align">${record.farmer_puzzle_hash}</p>
+			<hr>
+			<p class="one-fourth"><b>Pool Puzzle Hash:</b></p>
+			<p class="three-fourths right-align">${record.pool_puzzle_hash}</p>
+			<hr>
+			<p class="one-fourth"><b>Farmer Address:</b></p>
+			<p class="three-fourths right-align">${puzzle_hash_to_address(record.farmer_puzzle_hash)}</p>
+			<hr>
+			<p class="one-fourth"><b>Pool Address:</b></p>
+			<p class="three-fourths right-align">${puzzle_hash_to_address(record.pool_puzzle_hash)}</p>
+			<hr>
+			<p class="one-fourth"><b>Transactions Filter Hash:</b></p>
+			<p class="three-fourths right-align">${(blockData.foliage_transaction_block || {}).filter_hash || ""}</p>
+			<hr>
+			<p class="one-fourth"><b>Number of Additions:</b></p>
+			<p class="three-fourths right-align">${additions.length}</p>
+			<hr>
+			<p class="one-fourth"><b>Total Additions Amount:</b></p>
+			<p class="three-fourths right-align">${(additionsAmount / ONE_TRILLION).toFixed(12)} XCH</p>
+			<hr>
+			<p class="one-fourth"><b>Number of Removals:</b></p>
+			<p class="three-fourths right-align">${removals.length}</p>
+			<hr>
+			<p class="one-fourth"><b>Total Removals Amount:</b></p>
+			<p class="three-fourths right-align">${(removalsAmount / ONE_TRILLION).toFixed(12)} XCH</p>
+			<hr>
+			<p class="one-fourth"><b>Fees Amount:</b></p>
+			<p class="three-fourths right-align">${(record.fees / ONE_TRILLION).toFixed(12)} XCH</p>
+			<hr>
+			<div class="center-container">${prevNext}</div>
+			`;
+		} else {
+			document.querySelector("#block_info").innerHTML = `
+			<h3 class="action">Block Info:</h3>
+			<p>Unable to find block!</p>
+			`;
+		}
+	} else {
+		document.querySelector("#block_info").innerHTML = `
+		<h3 class="action">Block Info:</h3>
+		<p>Unable to find block!</p>
+		`;
 
-const switchPage = (pageName) => {
+	}
+}
+
+
+const switchPage = (pageName, data) => {
 	if(page != pageName) {
 		page = pageName;
 		hideAll(false);
@@ -337,13 +451,17 @@ const switchPage = (pageName) => {
 		for(let i = 0; i < menuItemsActive.length; i++) {
 			menuItemsActive[i].classList.remove("menu-item-active");
 		}
-		document.querySelector(`#menuitem_${pageName}`).classList.add("menu-item-active");
+		if(document.querySelector(`#menuitem_${pageName}`) != null) {
+			document.querySelector(`#menuitem_${pageName}`).classList.add("menu-item-active");
+		}
 	}
 	if(pageName == "settings") {
 		document.querySelector("#input_settings_keyname").value = getKeyName(key, keyindex, false);
 		if(document.querySelectorAll("#terminal > code").length == 1) {
 			runCommand("-h");
 		}
+	} else if(pageName == "block") {
+		showBlockInfo(data);
 	}
 	document.querySelector(`#page_${pageName}`).style.display = "block";
 }
