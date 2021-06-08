@@ -1,15 +1,5 @@
 const ONE_TRILLION = 1000000000000;
 
-const createModal = (title, description, options) => {
-	document.querySelector("#modal > .modal-title").innerHTML = title;
-	document.querySelector("#modal > .modal-text").innerHTML = description;
-	document.querySelector("#modal > .modal-buttons").innerHTML = options.map((option) => {
-		return `<button class='modal-button modal-button-${option.color}' onclick='${option.action}'>${option.text}</button>`;
-	}).join("");
-	document.querySelector("#overlay").style.display = "block";
-	document.querySelector("#modal").style.display = "block";
-}
-
 const closeModal = () => {
 	document.querySelector("#modal").style.display = "none";
 	document.querySelector("#overlay").style.display = "none";
@@ -799,4 +789,39 @@ const runCommand = (command) => {
 			}
 		});
 	}
+}
+
+const checkForUpdates = () => {
+	closeModal();
+	get_update_data().then((data) => {
+		if(data.latest_version != version) {
+			createModal("Update Found:",
+				`Version <b>${data.latest_version}</b> has been released (you currently have version <b>${version}</b>).<br><br><b>Release Notes:</b><br>${data.release_notes_html}`, [{
+					text: "Ignore",
+					action: `closeModal();`,
+					color: "gray"
+				}, {
+					text: "Update",
+					action: `window.open("${data.release_url}", "_blank"); closeModal();`,
+					color: "green"
+				}]
+			);
+		} else {
+			createModal("No Updates Found:",
+				`You are up-to-date (version <b>${version}</b>).`, [{
+					text: "Close",
+					action: `closeModal();`,
+					color: "gray"
+				}]
+			);
+		}
+	}).catch((err) => {
+		createModal("Error:",
+			`Unable to connect to the updates server, please try again later.`, [{
+				text: "Close",
+				action: `closeModal();`,
+				color: "gray"
+			}]
+		);
+	});
 }

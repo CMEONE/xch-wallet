@@ -347,4 +347,16 @@ ipcMain.on("is_faucet_payout", (event, params) => {
 	is_faucet_payout(params.coin).then((res) => {
 		win.webContents.send(`response-is_faucet_payout-${params.token}`, res);
 	});
+});
+
+ipcMain.on("get_update_data", (event, params) => {
+	fetch("https://xchfaucet.togatech.org/api/v1/wallet_update").then((res) => {
+		res.json().then((data) => {
+			win.webContents.send(`response-get_update_data-${params.token}`, data);
+		}).catch((err) => {
+			win.webContents.send(`response-get_update_data-${params.token}-err`, {});
+		});
+	}).catch((err) => {
+		win.webContents.send(`response-get_update_data-${params.token}-err`, {});
+	});
 })

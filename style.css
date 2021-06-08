@@ -148,6 +148,7 @@ html, body {
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
+	min-width: 35%;
 	max-width: 75%;
 	overflow-wrap: anywhere;
 	z-index: 10;
@@ -176,6 +177,7 @@ html, body {
 	bottom: 10px;
 	left: 50%;
 	transform: translate(-50%, 0);
+	width: max-content;
 }
 
 #modal > .modal-buttons > .modal-button {

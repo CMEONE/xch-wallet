@@ -409,6 +409,16 @@ const is_faucet_payout = (coin) => {
 	});
 }
 
+const createModal = (title, description, options) => {
+	document.querySelector("#modal > .modal-title").innerHTML = title;
+	document.querySelector("#modal > .modal-text").innerHTML = description;
+	document.querySelector("#modal > .modal-buttons").innerHTML = options.map((option) => {
+		return `<button class='modal-button modal-button-${option.color}' onclick='${option.action}'>${option.text}</button>`;
+	}).join("");
+	document.querySelector("#overlay").style.display = "block";
+	document.querySelector("#modal").style.display = "block";
+}
+
 
 const expose = () => {
 	contextBridge.exposeInMainWorld("wallet", wallet);
@@ -424,6 +434,9 @@ const expose = () => {
 	contextBridge.exposeInMainWorld("address_to_puzzle_hash", address_to_puzzle_hash);
 	contextBridge.exposeInMainWorld("copy", clipboard.writeText);
 	contextBridge.exposeInMainWorld("is_faucet_payout", is_faucet_payout);
+	contextBridge.exposeInMainWorld("createModal", createModal);
+	contextBridge.exposeInMainWorld("get_update_data", get_update_data);
+	contextBridge.exposeInMainWorld("version", version);
 }
 
 const showKeys = () => {
@@ -517,7 +530,7 @@ using the command parameters instead (use the \`-h\` option to view the paramete
 	});
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+const loadDaemon = () => {
 	document.querySelector("#loader > h3").innerHTML = `Starting Chia Daemon...`;
 	document.querySelector("#loader").style.display = "block";
 	execute(`chia init && chia start wallet`).then((res) => {
@@ -531,5 +544,43 @@ window.addEventListener('DOMContentLoaded', () => {
 			throw err;
 		});
 	});
-	
+}
+
+const version = "1.0.0";
+
+const get_update_data = () => {
+	return new Promise(async (resolve, reject) => {
+		let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+		ipcRenderer.on(`response-get_update_data-${token}`, (event, response) => resolve(response));
+		ipcRenderer.on(`response-get_update_data-${token}-err`, (event, response) => reject(response));
+		ipcRenderer.send("get_update_data", {
+			token
+		});
+	});
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+	document.querySelector("#loader > h3").innerHTML = `Checking for Updates...`;
+	document.querySelector("#loader").style.display = "block";
+	get_update_data().then((data) => {
+		if(data.latest_version != version) {
+			contextBridge.exposeInMainWorld("loadDaemon", loadDaemon);
+			document.querySelector("#loader").style.display = "none";
+			createModal("Update:",
+				`Version <b>${data.latest_version}</b> has been released (you currently have version <b>${version}</b>).<br><br><b>Release Notes:</b><br>${data.release_notes_html}`, [{
+					text: "Ignore",
+					action: `closeModal(); loadDaemon();`,
+					color: "gray"
+				}, {
+					text: "Update",
+					action: `window.open("${data.release_url}", "_blank")`,
+					color: "green"
+				}]
+			);
+		} else {
+			loadDaemon();
+		}
+	}).catch((err) => {
+		loadDaemon();
+	});
 });
