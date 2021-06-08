@@ -104,11 +104,18 @@ const formatType = (t) => {
 	}
 }
 
-const formatTransactionType = (t, a) => {
+const formatTransactionType = async (t, a, c) => {
 	if(a == "xch14u4eykuc04p2egqmteqnatjjw3khktjzvn55vlqgyzjsxhj8n3tstt4rnm") {
 		return "Developer Donation";
 	} else if(t == 0) {
-		return "Incoming";
+		let payout = await is_faucet_payout(c).catch((err) => {
+			return "Incoming";
+		});
+		if(payout) {
+			return "XCH Faucet";
+		} else {
+			return "Incoming";
+		}
 	} else if(t == 1) {
 		return "Outgoing";
 	} else {
@@ -361,6 +368,9 @@ const updateWalletInfo = async (wallets) => {
 			<button class="button" style="margin-right: 0;" onclick="newAddress();">New Address</button>
 		</div>
 		`
+		for(let i = 0; i < allTransactions.length; i++) {
+			allTransactions[i].transactionType = await formatTransactionType(allTransactions[i].type, allTransactions[i].to_address, allTransactions[i].name);
+		}
 		document.querySelector("#wallet_history").innerHTML = `
 		<h3 class="action">History:</h3>
 		<div class="table-container">
@@ -379,7 +389,7 @@ const updateWalletInfo = async (wallets) => {
 				}
 				return `
 				<tr>
-					<td><p>${formatTransactionType(transaction.type, transaction.to_address)}</p></td>
+					<td><p>${transaction.transactionType}</p></td>
 					<td class="long"><p>${transaction.to_address}</p></td>
 					<td><p>${formatBalance(transaction.amount)}</p></td>
 					<td><p>${formatBalance(transaction.fee_amount)}</p></td>

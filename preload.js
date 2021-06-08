@@ -397,6 +397,19 @@ const getKeyName = (key, index, includeFingerprint = true) => {
 	}
 }
 
+const is_faucet_payout = (coin) => {
+	return new Promise(async (resolve, reject) => {
+		let token = Math.random().toString(36).substr(2) + Math.random().toString(36).substr(2);
+		ipcRenderer.on(`response-is_faucet_payout-${token}`, (event, response) => resolve(response));
+		ipcRenderer.on(`response-is_faucet_payout-${token}-err`, (event, response) => reject(response));
+		ipcRenderer.send("is_faucet_payout", {
+			token,
+			coin
+		});
+	});
+}
+
+
 const expose = () => {
 	contextBridge.exposeInMainWorld("wallet", wallet);
 	contextBridge.exposeInMainWorld("connections", connections);
@@ -410,6 +423,7 @@ const expose = () => {
 	contextBridge.exposeInMainWorld("puzzle_hash_to_address", puzzle_hash_to_address);
 	contextBridge.exposeInMainWorld("address_to_puzzle_hash", address_to_puzzle_hash);
 	contextBridge.exposeInMainWorld("copy", clipboard.writeText);
+	contextBridge.exposeInMainWorld("is_faucet_payout", is_faucet_payout);
 }
 
 const showKeys = () => {

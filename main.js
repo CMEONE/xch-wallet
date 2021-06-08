@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const { Wallet, SharedCalls, FullNode } = require("chia-client");
 const wallet = new Wallet();
@@ -314,3 +315,37 @@ ipcMain.on("fullnode", (event, params) => {
 		win.webContents.send(`response-fullnode-${params.token}-err`, "Command not found!");
 	}
 });
+
+let faucet_payout_coins_cache = {
+
+}
+
+const is_faucet_payout = (coin) => {
+	return new Promise(async (resolve, reject) => {
+		let timestamp = (new Date()).getTime();
+		if(faucet_payout_coins_cache[coin] == null || faucet_payout_coins_cache[coin].timestamp > timestamp + (1000 * 60 * 15)) {
+			console.log("fetch");
+			fetch(`https://xchfaucet.togatech.org/api/v1/is_payout?coin=${coin}`).then((res) => {
+				res.text().then((text) => {
+					faucet_payout_coins_cache[coin] = {
+						timestamp: (new Date()).getTime(),
+						result: text == "true"
+					}
+					resolve(text == "true");
+				}).catch((err) => {
+					resolve(false);
+				});
+			}).catch((err) => {
+				resolve(false);
+			});
+		} else {
+			resolve(faucet_payout_coins_cache[coin].result);
+		}
+	});
+}
+
+ipcMain.on("is_faucet_payout", (event, params) => {
+	is_faucet_payout(params.coin).then((res) => {
+		win.webContents.send(`response-is_faucet_payout-${params.token}`, res);
+	});
+})
