@@ -422,6 +422,13 @@ const donateInfo = () => {
 
 const sendPaymentModal = () => {
 	let address = document.querySelector("#input_wallet_address").value || "";
+	if(address.startsWith("0x")) {
+		try {
+			address = puzzle_hash_to_address(address);
+		} catch(err) {
+
+		}
+	}
 	let amount = parseInt((document.querySelector("#input_wallet_amount").value || 0) * ONE_TRILLION);
 	let fee = parseInt((document.querySelector("#input_wallet_fee").value || 0) * ONE_TRILLION);
 	let donation = parseInt((document.querySelector("#input_wallet_donation").value || 0) * ONE_TRILLION);
