@@ -470,7 +470,6 @@ const rotateDeveloperDonation = async (id, donation, address, fee) => {
 const sendPayment = (address, amount, fee, donation) => {
 	closeModal();
 	wallet.sendTransactionRaw(walletId, amount, address, fee).then((res) => {
-		console.log(res);
 		if(res.success) {
 			document.querySelector("#input_wallet_address").value = "";
 			document.querySelector("#input_wallet_amount").value = "";
@@ -483,7 +482,6 @@ const sendPayment = (address, amount, fee, donation) => {
 			document.querySelector("#wallet_send_status").innerHTML = `<p class="red">${res.error}</p>`;
 		}
 	}).catch((err) => {
-		console.log(err);
 	});
 }
 
@@ -554,12 +552,6 @@ const loginKey = (fingerprint, index) => {
 		if(res.success) {
 			key = fingerprint;
 			keyindex = index;
-			let wallets = await wallet.getWallets() || [];
-			let balance = await wallet.getWalletBalance(1) || {};
-			let transactions = await wallet.getTransactions(1, 100) || [];
-			let connectionsList = await connections.getConnections() || {};
-			let blockchainState = await fullnode.getBlockchainState() || {};
-			let networkName = (await fullnode.getNetworkInfo() || {}).network_name || "mainnet";
 			if(nodeInterval == null) {
 				nodeInterval = setInterval(async () => {
 					if(page == "node" && document.querySelector("#menu").style.display != "none") {
@@ -578,11 +570,6 @@ const loginKey = (fingerprint, index) => {
 					}
 				}, 10000);
 			}
-			console.log(wallets);
-			console.log(balance);
-			console.log(transactions);
-			console.log(connectionsList);
-			console.log(blockchainState);
 			hideAll();
 			document.querySelector("#menu").style.display = "block";
 			switchPage("node");
