@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "chia-client": "^9.5.0",
-    "chia-utils": "^1.0.4",
+    "chia-utils": "^1.0.5",
     "node-fetch": "^2.6.1",
     "patch-package": "^6.4.7"
   }

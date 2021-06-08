@@ -324,7 +324,6 @@ const is_faucet_payout = (coin) => {
 	return new Promise(async (resolve, reject) => {
 		let timestamp = (new Date()).getTime();
 		if(faucet_payout_coins_cache[coin] == null || faucet_payout_coins_cache[coin].timestamp > timestamp + (1000 * 60 * 15)) {
-			console.log("fetch");
 			fetch(`https://xchfaucet.togatech.org/api/v1/is_payout?coin=${coin}`).then((res) => {
 				res.text().then((text) => {
 					faucet_payout_coins_cache[coin] = {
