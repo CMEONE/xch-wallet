@@ -385,6 +385,12 @@ html, body {
 	font-size: 1.85em;
 }
 
+.pane p {
+	overflow: hidden;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+}
+
 .input {
 	font-size: 1.5em;
 	padding: 5px;
@@ -547,43 +553,47 @@ p.half-margin {
 	margin-bottom: 10px;
 }
 
-.node-table-container {
+.table-container {
 	width: 100%;
 	box-shadow: var(--shadow-active);
 	overflow-x: auto;
 }
 
-.node-table {
+.table {
 	border-collapse: collapse;
 	width: 100%;
 	box-sizing: border-box;
 	font-size: 0.8em;
 }
-.node-table th.long > p, .node-table td.long > p {
+.table p {
+	overflow: hidden;
+	overflow-wrap: anywhere;
+}
+.table th.long > p, .table td.long > p {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	margin: 5px;
 }
-.node-table th.long, .node-table td.long {
+.table th.long, .table td.long {
 	max-width: 100px;
 }
 
-.node-table th, .node-table td {
+.table th, .table td {
 	max-width: 75px;
 	white-space: pre-wrap;
 }
 
-.node-table td, .node-table th {
+.table td, .table th {
 	text-align: left;
 	padding: 10px;
 }
 
-.node-table tr:nth-child(even) {
+.table tr:nth-child(even) {
 	background-color: var(--background-lighter);
 }
 
-.node-table i {
+.table i {
 	font-size: 1.5em;
 	cursor: pointer;
 }

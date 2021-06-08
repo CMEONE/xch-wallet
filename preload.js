@@ -126,6 +126,15 @@ function Wallet() {
 		});
 	}
 
+	this.sendTransactionRaw = (walletId, amount, address, fee) => {
+		return sendCommand("sendTransactionRaw", {
+			walletId,
+			amount,
+			address,
+			fee
+		});
+	}
+
 	this.createBackup = (filePath) => {
 		return sendCommand("createBackup", {
 			filePath

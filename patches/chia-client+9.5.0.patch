@@ -13,7 +13,7 @@ index 547fc0c..17bae75 100644
      addressToPuzzleHash(address) {
          return chia_utils_1.address_to_puzzle_hash(address);
 diff --git a/node_modules/chia-client/dist/src/Wallet.js b/node_modules/chia-client/dist/src/Wallet.js
-index 1eba50f..9cfbc23 100644
+index 1eba50f..12a6b97 100644
 --- a/node_modules/chia-client/dist/src/Wallet.js
 +++ b/node_modules/chia-client/dist/src/Wallet.js
 @@ -100,6 +100,10 @@ class Wallet extends RpcClient_1.RpcClient {
@@ -27,3 +27,19 @@ index 1eba50f..9cfbc23 100644
      async getNextAddress(walletId) {
          const { address } = await this.request("get_next_address", { wallet_id: walletId, new_address: true });
          return address;
+@@ -113,6 +117,15 @@ class Wallet extends RpcClient_1.RpcClient {
+         });
+         return transaction;
+     }
++    async sendTransactionRaw(walletId, amount, address, fee) {
++        const transaction = await this.request("send_transaction", {
++            wallet_id: walletId,
++            amount,
++            address,
++            fee,
++        });
++        return transaction;
++    }
+     async createBackup(filePath) {
+         return this.request("create_backup", { file_path: filePath });
+     }

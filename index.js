@@ -61,9 +61,9 @@ let key;
 let keyindex;
 let walletId = 1;
 
-const formatNumber = (num) => {
+const formatNumber = (num, fallback = "") => {
 	if(num == null) {
-		return "";
+		return fallback || "";
 	} else {
 		return (new Number(num)).toLocaleString();
 	}
@@ -101,6 +101,18 @@ const formatType = (t) => {
 		return "Plotter";
 	} else {
 		return "Unknown"
+	}
+}
+
+const formatTransactionType = (t, a) => {
+	if(a == "xch14u4eykuc04p2egqmteqnatjjw3khktjzvn55vlqgyzjsxhj8n3tstt4rnm") {
+		return "Developer Donation";
+	} else if(t == 0) {
+		return "Incoming";
+	} else if(t == 1) {
+		return "Outgoing";
+	} else {
+		return "";
 	}
 }
 
@@ -228,8 +240,8 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 
 		document.querySelector("#node_connections").innerHTML = `
 		<h3 class="action">Connections:</h3>
-		<div class="node-table-container">
-			<table class="node-table">
+		<div class="table-container">
+			<table class="table">
 				<tr>
 					<th class="long"><p>Node ID</p></th>
 					<th><p>IP Address</p></th>
@@ -258,8 +270,8 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 
 		document.querySelector("#node_blocks").innerHTML = `
 		<h3 class="action">Blocks:</h3>
-		<div class="node-table-container">
-			<table class="node-table">
+		<div class="table-container">
+			<table class="table">
 				<tr>
 					<th class="long"><p>Header Hash</p></th>
 					<th><p>Height</p></th>
@@ -318,41 +330,140 @@ const updateWalletInfo = async (wallets) => {
 		}
 		let balances = await wallet.getWalletBalance(walletId) || {};
 		let address = await wallet.getAddress(walletId) || "";
-		document.querySelector("#walletcontent").innerHTML = `
-		<h2 class="page-title">Wallet:</h2>
-		<div class="pane">
-			<h3 class="action">Status:</h3>
-			<p class="half half-margin"><b>Sync Status: </b> <span class="${syncedColor}">${synced}</span></p>
-			<p class="half half-margin"><b>Height: </b> ${formatNumber(walletHeight)}</p>
+		let txpage = transactionPage;
+		let allTransactions = (await wallet.getTransactions(walletId, 51 + txpage * 50) || []).reverse();
+		let prevNext = ``;
+		if(transactionPage > 0) {
+			prevNext += `<button class="button" onclick="previousTransactionPage()">&lt; More Recent</button>`;
+		}
+		if(allTransactions.length % 50 == 1) {
+			prevNext += `<button class="button" onclick="nextTransactionPage()">Less Recent &gt;</button>`;
+		}
+		allTransactions = allTransactions.slice(txpage * 50, 50 + txpage * 50);
+		document.querySelector("#wallet_status").innerHTML = `
+		<h3 class="action">Status:</h3>
+		<p class="half half-margin"><b>Sync Status: </b> <span class="${syncedColor}">${synced}</span></p>
+		<p class="half half-margin"><b>Height: </b> ${formatNumber(walletHeight)}</p>
+		`;
+		document.querySelector("#wallet_balance").innerHTML = `
+		<h3 class="action">Balance:</h3>
+		<p class="one-third half-margin"><b>Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.confirmed_wallet_balance)}</p>
+		<p class="one-third half-margin"><b>Spendable Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.spendable_balance)}</p>
+		<p class="one-third half-margin"><b>Pending Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance)}</p>
+		<p class="one-third half-margin"><b>Pending Amount:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance - balances.confirmed_wallet_balance)}</p>
+		<p class="one-third half-margin"><b>Pending Change:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.pending_change)}</p>
+		`;
+		document.querySelector("#wallet_receive").innerHTML = `
+		<h3 class="action">Receive:</h3>
+		<p><b id="wallet_address">${address}</b></p>
+		<div class="left-container">
+			<button class="button background-white" onclick="copyAddress();">Copy</button>
+			<button class="button" style="margin-right: 0;" onclick="newAddress();">New Address</button>
 		</div>
-		<div class="pane">
-			<h3 class="action">Balance:</h3>
-			<p class="one-third half-margin"><b>Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.confirmed_wallet_balance)}</p>
-			<p class="one-third half-margin"><b>Spendable Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.spendable_balance)}</p>
-			<p class="one-third half-margin"><b>Pending Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance)}</p>
-			<p class="one-third half-margin"><b>Pending Amount:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance - balances.confirmed_wallet_balance)}</p>
-			<p class="one-third half-margin"><b>Pending Change:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.pending_change)}</p>
-		</div>
-		<div class="pane">
-			<h3 class="action">Receive:</h3>
-			<p><b id="wallet_address">${address}</b></p>
-			<div class="left-container">
-				<button class="button background-white" onclick="copyAddress();">Copy</button>
-				<button class="button" style="margin-right: 0;" onclick="newAddress();">New Address</button>
-			</div>
-		</div>
-		<div class="pane">
-			<h3 class="action">Send:</h3>
-			<input class="input input-full" placeholder="Wallet Address" id="input_wallet_address" />
-			<input class="input input-full" placeholder="Amount" id="input_wallet_amount" type="number" />
-			<input class="input input-firsthalf" placeholder="Farmer Fee" id="input_wallet_farmerfee" type="number" />
-			<input class="input input-secondhalf" placeholder="Developer Fee (Optional)" id="input_wallet_devfee" type="number" />
-			<div class="left-container">
-				<button class="button" onclick="sendPayment();">Send</button>
-			</div>
-		</div>
+		`
+		document.querySelector("#wallet_history").innerHTML = `
+		<h3 class="action">History:</h3>
+		<div class="table-container">
+		<table class="table">
+			<tr>
+				<th><p>Type</p></th>
+				<th class="long"><p>To</p></th>
+				<th><p>Amount</p></th>
+				<th><p>Fee</p></th>
+				<th><p>Height</p></th>
+				<th><p>Timestamp</p></th>
+			</tr>
+			${allTransactions.map((transaction) => {
+				if(transaction.confirmed_at_height == 0) {
+					transaction.confirmed_at_height = null;
+				}
+				return `
+				<tr>
+					<td><p>${formatTransactionType(transaction.type, transaction.to_address)}</p></td>
+					<td class="long"><p>${transaction.to_address}</p></td>
+					<td><p>${formatBalance(transaction.amount)}</p></td>
+					<td><p>${formatBalance(transaction.fee_amount)}</p></td>
+					<td><p>${formatNumber(transaction.confirmed_at_height, "Unconfirmed")}</p></td>
+					<td><p>${formatTime(transaction.created_at_time)}</p></td>
+				</tr>
+				`;
+			}).join("")}
+		</table>
+		<div class="center-container">${prevNext}</div>
 		`;
 	}
+}
+
+const sendPaymentModal = () => {
+	let address = document.querySelector("#input_wallet_address").value || "";
+	let amount = parseInt((document.querySelector("#input_wallet_amount").value || 0) * ONE_TRILLION);
+	let fee = parseInt((document.querySelector("#input_wallet_fee").value || 0) * ONE_TRILLION);
+	let donation = parseInt((document.querySelector("#input_wallet_donation").value || 0) * ONE_TRILLION);
+	if(donation == 0) {
+		createModal("Developer Donation:", 
+			`<p>Your transaction does not contain a developer donation. While optional, these donations are the only way we can continue to develop and maintain XCH Wallet. Please consider adding a small amount as a donation in the developer donation input field. Thanks so much!</p>`, [{
+				text: "Send Anyway",
+				action: `sendPayment("${address}", ${amount}, ${fee}, ${donation})`,
+				color: "gray"
+			}, {
+				text: "Add Donation",
+				action: `closeModal()`,
+				color: "green"
+			}]
+		);
+	} else {
+		sendPayment(address, amount, fee, donation);
+	}
+}
+
+const rotateDeveloperDonation = async (id, donation, address, fee) => {
+	let balances = await wallet.getWalletBalance(id) || {};
+	let pending = balances.unconfirmed_wallet_balance || 0;
+	if(pending >= donation) {
+		wallet.sendTransactionRaw(id, donation, address, fee).then(() => {
+			if(!res.success) {
+				setTimeout(() => {
+					rotateDeveloperPayment(id, donation, address, fee);
+				}, 1000);
+			}
+		}).catch((err) => {
+			setTimeout(() => {
+				rotateDeveloperPayment(id, donation, address, fee);
+			}, 1000);
+		});
+	}
+}
+
+const sendPayment = (address, amount, fee, donation) => {
+	closeModal();
+	wallet.sendTransactionRaw(walletId, amount, address, fee).then((res) => {
+		console.log(res);
+		if(res.success) {
+			document.querySelector("#input_wallet_address").value = "";
+			document.querySelector("#input_wallet_amount").value = "";
+			document.querySelector("#input_wallet_fee").value = "";
+			document.querySelector("#input_wallet_donation").value = "";
+			document.querySelector("#wallet_send_status").innerHTML = `<p class="green">Transaction has successfully been sent to a full node and included in the mempool.</p>`;	
+		
+			rotateDeveloperDonation(walletId, donation, "xch14u4eykuc04p2egqmteqnatjjw3khktjzvn55vlqgyzjsxhj8n3tstt4rnm", 0);
+		} else {
+			document.querySelector("#wallet_send_status").innerHTML = `<p class="red">${res.error}</p>`;
+		}
+	}).catch((err) => {
+		console.log(err);
+	});
+}
+
+let transactionPage = 0;
+
+const nextTransactionPage = async () => {
+	transactionPage++;
+	updateWalletInfo(await wallet.getWallets() || []);
+}
+
+const previousTransactionPage = async () => {
+	transactionPage--;
+	updateWalletInfo(await wallet.getWallets() || []);
 }
 
 const newAddress = async () => {

@@ -10,7 +10,7 @@ let win;
 
 const createWindow = () => {
 	win = new BrowserWindow({
-		width: 1200,
+		width: 1400,
 		height: 1000,
 		minWidth: 550,
 		minHeight: 550,
@@ -156,6 +156,12 @@ ipcMain.on("wallet", (event, params) => {
 		});
 	} else if(params.command == "sendTransaction") {
 		wallet.sendTransaction(params.args.walletId, params.args.amount, params.args.address, params.args.fee).then((res) => {
+			win.webContents.send(`response-wallet-${params.token}`, res);
+		}).catch((err) => {
+			win.webContents.send(`response-wallet-${params.token}-err`, err);
+		});
+	} else if(params.command == "sendTransactionRaw") {
+		wallet.sendTransactionRaw(params.args.walletId, params.args.amount, params.args.address, params.args.fee).then((res) => {
 			win.webContents.send(`response-wallet-${params.token}`, res);
 		}).catch((err) => {
 			win.webContents.send(`response-wallet-${params.token}-err`, err);

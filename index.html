@@ -50,7 +50,26 @@
 		</div>
 		<div class="page" id="page_wallet" style="display: none;">
 			<div id="walletlist"></div>
-			<div id="walletcontent"></div>
+			<div id="walletcontent">
+				<h2 class="page-title" id="block_title">Wallet:</h2>
+				<div class="pane" id="wallet_status"></div>
+				<div class="pane" id="wallet_balance"></div>
+				<div class="pane" id="wallet_receive"></div>
+				<div class="pane" id="wallet_send">
+					<h3 class="action">Send:</h3>
+					<div id="wallet_send_status">
+						
+					</div>
+					<input class="input input-full" placeholder="Address" id="input_wallet_address" />
+					<input class="input input-full" placeholder="Amount" id="input_wallet_amount" type="number" />
+					<input class="input input-firsthalf" placeholder="Farmer Fee" id="input_wallet_fee" type="number" />
+					<input class="input input-secondhalf" placeholder="Developer Donation (Optional)" id="input_wallet_donation" type="number" />
+					<div class="left-container">
+						<button class="button" onclick="sendPaymentModal();">Send</button>
+					</div>
+				</div>
+				<div class="pane" id="wallet_history"></div>
+			</div>
 		</div>
 		<div class="page" id="page_plots" style="display: none;">
 			<h3 class="notice">The Plots page is coming soon!</h3>
