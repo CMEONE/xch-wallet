@@ -19,9 +19,9 @@ const createWindow = () => {
 			preload: path.join(__dirname, 'preload.js')
 		},
 		title: "XCH Wallet",
-		backgroundColor: "#373c46"
+		backgroundColor: "#373c46",
+		icon: path.join(__dirname, 'public/XCHWallet.png')
 	});
-
 	win.loadFile('index.html');
 
 	win.webContents.on('new-window', function(e, url) {
