@@ -283,7 +283,7 @@ html, body {
 }
 
 #walletlist {
-	position: absolute;
+	position: fixed;
 	top: 30px;
 	left: 210px;
 	width: 250px;
@@ -385,12 +385,9 @@ html, body {
 	font-size: 1.85em;
 }
 
-.input-full {
-	width: 100%;
+.input {
 	font-size: 1.5em;
 	padding: 5px;
-	margin: 10px;
-	margin-left: 0;
 	box-sizing: border-box;
 	background-color: var(--background);
 	border: 3px solid var(--green);
@@ -401,10 +398,30 @@ html, body {
 				box-shadow 0.2s ease-in-out;
 }
 
-.input-full:active, .input-full:focus {
+.input:active, .input:focus {
 	transform: scale(0.99);
 	box-shadow: none;
 	outline: none;
+}
+
+.input-full {
+	width: 100%;
+	margin: 10px;
+	margin-left: 0;
+}
+
+.input-firsthalf {
+	width: calc(50% - 8px);
+	margin: 10px;
+	margin-right: 5px;
+	margin-left: 0;
+}
+
+.input-secondhalf {
+	width: calc(50% - 8px);
+	margin: 10px;
+	margin-left: 5px;
+	margin-right: 0;
 }
 
 .button {

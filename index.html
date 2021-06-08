@@ -65,7 +65,7 @@
 			<h2 class="page-title">Settings:</h2>
 			<div class="pane">
 				<h3 class="action">Key Name:</h3>
-				<input class="input-full" placeholder="Key Name" id="input_settings_keyname" />
+				<input class="input input-full" placeholder="Key Name" id="input_settings_keyname" />
 				<div class="left-container">
 					<button class="button" style="margin-right: 0;" id="button_settings_keyname" onclick="saveKeyName(document.querySelector('#input_settings_keyname').value)">Save</button>
 				</div>
@@ -75,7 +75,7 @@
 				<div id="terminal">
 					<code class="green"><b>chia > </b></code>
 				</div>
-				<input class="input-full" placeholder="Command (example: `-h`)" id="input_settings_terminal" />
+				<input class="input input-full" placeholder="Command (example: `-h`)" id="input_settings_terminal" />
 				<div class="left-container">
 					<button class="button background-red" style="margin-right: 0;" onclick="runCommand('abort')">Abort</button>
 					<button class="button" style="margin-right: 0;" id="button_settings_terminal" onclick="runCommand(document.querySelector('#input_settings_terminal').value)">Run</button>

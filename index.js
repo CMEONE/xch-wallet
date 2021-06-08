@@ -341,6 +341,16 @@ const updateWalletInfo = async (wallets) => {
 				<button class="button" style="margin-right: 0;" onclick="newAddress();">New Address</button>
 			</div>
 		</div>
+		<div class="pane">
+			<h3 class="action">Send:</h3>
+			<input class="input input-full" placeholder="Wallet Address" id="input_wallet_address" />
+			<input class="input input-full" placeholder="Amount" id="input_wallet_amount" type="number" />
+			<input class="input input-firsthalf" placeholder="Farmer Fee" id="input_wallet_farmerfee" type="number" />
+			<input class="input input-secondhalf" placeholder="Developer Fee (Optional)" id="input_wallet_devfee" type="number" />
+			<div class="left-container">
+				<button class="button" onclick="sendPayment();">Send</button>
+			</div>
+		</div>
 		`;
 	}
 }
