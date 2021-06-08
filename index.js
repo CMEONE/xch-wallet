@@ -261,7 +261,7 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 				${allConnections.map((conn) => {
 					return `
 					<tr>
-						<td class="long"><p>${conn.node_id}</p></td>
+						<td class="long" data-tooltip="${conn.node_id}"><p>${conn.node_id}</p></td>
 						<td><p>${conn.peer_host}</p></td>
 						<td><p>${conn.peer_port}/${conn.peer_server_port}</p></td>
 						<td><p>${(conn.bytes_written / (1024 * 1024)).toFixed(1)}/${(conn.bytes_read / (1024 * 1024)).toFixed(1)}</p></td>
@@ -292,7 +292,7 @@ const updateNodeInfo = async (networkName, blockchainState, connectionsList) => 
 					}
 					return `
 					<tr${onclickData}>
-						<td class="long"><p>${block.header_hash}</p></td>
+						<td class="long" data-tooltip="${block.header_hash}"><p>${block.header_hash}</p></td>
 						<td><p>${formatNumber(block.height)}</p></td>
 						<td><p>${formatTime(block.timestamp)}</p></td>
 						<td><p>${block.is_finished_state}</p></td>
@@ -396,7 +396,7 @@ const updateWalletInfo = async (wallets) => {
 				return `
 				<tr>
 					<td><p>${transaction.transactionType}</p></td>
-					<td class="long"><p>${transaction.to_address}</p></td>
+					<td class="long" data-tooltip="${transaction.to_address}"><p>${transaction.to_address}</p></td>
 					<td><p>${formatBalance(transaction.amount)}</p></td>
 					<td><p>${formatBalance(transaction.fee_amount)}</p></td>
 					<td><p>${formatNumber(transaction.confirmed_at_height, "Unconfirmed")}</p></td>

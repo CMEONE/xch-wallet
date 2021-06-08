@@ -611,3 +611,24 @@ p.half-margin {
 #block_info b {
 	font-size: 1.2em;
 }
+
+
+[data-tooltip]:not([data-tooltip=""])::after {
+	content: attr(data-tooltip);
+	display: inline-block;
+	padding: 5px;
+	background-color: var(--background);
+	color: var(--white);
+	box-shadow: var(--shadow);
+	border-radius: 5px;
+	transform: scale(0.5) translate(0, 3px);
+	opacity: 0;
+	transform-origin: center;
+	transition: transform 0.2s ease-in-out,
+				opacity 0.2s ease-in-out;
+}
+
+[data-tooltip]:not([data-tooltip=""]):hover::after {
+	opacity: 1;
+	transform: scale(1) translate(0, 3px);
+}
