@@ -438,6 +438,7 @@ html, body {
 	box-sizing: border-box;
 	background-color: var(--green);
 	color: var(--background);
+	text-decoration: none;
 	cursor: pointer;
 	border: none;
 	border-radius: 10px;
@@ -446,6 +447,11 @@ html, body {
 	transform: scale(1);
 	transition: transform 0.2s ease-in-out,
 				box-shadow 0.2s ease-in-out;
+}
+
+.button a {
+	color: var(--background);
+	text-decoration: none;
 }
 
 .button:hover {

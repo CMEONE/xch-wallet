@@ -338,15 +338,16 @@ const updateWalletInfo = async (wallets) => {
 		let balances = await wallet.getWalletBalance(walletId) || {};
 		let address = await wallet.getAddress(walletId) || "";
 		let txpage = transactionPage;
-		let allTransactions = (await wallet.getTransactions(walletId, 51 + txpage * 50) || []).reverse();
+		let numTransactions = 10;
+		let allTransactions = (await wallet.getTransactions(walletId, numTransactions + 1 + txpage * numTransactions) || []).reverse();
 		let prevNext = ``;
 		if(transactionPage > 0) {
 			prevNext += `<button class="button" onclick="previousTransactionPage()">&lt; More Recent</button>`;
 		}
-		if(allTransactions.length % 50 == 1) {
+		if(allTransactions.length % numTransactions == 1) {
 			prevNext += `<button class="button" onclick="nextTransactionPage()">Less Recent &gt;</button>`;
 		}
-		allTransactions = allTransactions.slice(txpage * 50, 50 + txpage * 50);
+		allTransactions = allTransactions.slice(txpage * numTransactions, numTransactions + txpage * numTransactions);
 		document.querySelector("#wallet_status").innerHTML = `
 		<h3 class="action">Status:</h3>
 		<p class="half half-margin"><b>Sync Status: </b> <span class="${syncedColor}">${synced}</span></p>
@@ -359,6 +360,11 @@ const updateWalletInfo = async (wallets) => {
 		<p class="one-third half-margin"><b>Pending Total Balance:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance)}</p>
 		<p class="one-third half-margin"><b>Pending Amount:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.unconfirmed_wallet_balance - balances.confirmed_wallet_balance)}</p>
 		<p class="one-third half-margin"><b>Pending Change:</b></p><p class="two-thirds half-margin right-align">${formatBalance(balances.pending_change)}</p>
+		<p class="half-margin">&nbsp;</p>
+		<div class="left-container">
+			<p class="button background-white" style="display: inline-block; vertical-align: bottom;"><a href="https://xchfaucet.togatech.org" target="_blank">XCH Faucet</a></p>
+			<button class="button" style="margin-right: 0;" onclick="donateInfo();">Donate</button>
+		</div>
 		`;
 		document.querySelector("#wallet_receive").innerHTML = `
 		<h3 class="action">Receive:</h3>
@@ -402,6 +408,16 @@ const updateWalletInfo = async (wallets) => {
 		<div class="center-container">${prevNext}</div>
 		`;
 	}
+}
+
+const donateInfo = () => {
+	createModal("Developer Donation:", 
+		`<p>Thanks so much for considering a donation! These donations are the only way we can continue to develop and maintain XCH Wallet. To donate, please send 0 XCH to your receive address and add your donation amount in the Developer Donation input field.</p>`, [{
+			text: "Add Donation",
+			action: `closeModal()`,
+			color: "green"
+		}]
+	);
 }
 
 const sendPaymentModal = () => {
