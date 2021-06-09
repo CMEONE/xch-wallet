@@ -20,3 +20,9 @@ We provide pre-built versions of XCH Wallet on the [Releases page](https://githu
 
 ### Build
 First clone the repository. Then, navigate to the directory in your terminal and use the `npm install` command. To build the app, use `npx --no-install electron-builder`. You may be prompted by your OS for a password to sign the app for development. Please wait a few minutes for this command to run. Afterwards, you will find the app in the `/dist` folder within the directory.
+
+### macOS Warning
+When using the macOS version of XCH Wallet, you may encounter a warning that prevents you from opening the app. This warning just means that the app has not been signed (since it was done transparently with a Github Action). To fix this issue, simply right-click on the app and click the "Open" option, then confirm the decision in the popup menu. If you are uncomfortable with running the prebuilt version, we encourage that you follow the manual build instructions above.
+
+### Windows Warning
+When using the windows version of XCH Wallet, you may encounter a warning that prevents you from opening the app. This warning just means that the app has not been signed (since it was done transparently with a Github Action). To fix this issue, simply click the "More info" text on the popup and click the "Run anyway" option. If you are uncomfortable with running the prebuilt version, we encourage that you follow the manual build instructions above.
