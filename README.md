@@ -16,6 +16,7 @@ A modern interface for the Chia wallet
 	- [macOS Warning](#macos-warning)
 	- [Windows Warning](#windows-warning)
 - [Keys](#keys)
+- [Limitation of Liability](#limitation-of-liability)
 
 ## Install
 
@@ -38,4 +39,4 @@ When using the windows version of XCH Wallet, you may encounter a warning that p
 For security reasons, there is currently no way to generate or add keys through the XCH Wallet interface. To create or add keys, please use the CLI or official wallet.
 
 ## Limitation of Liability
-We are not in any way responsible for loss of funds resulting of your use of our wallet interface or services. Please follow best practices to keep your keys and funds safe and report any security vulnerabilities of our app in the Issues tab.
+We are not in any way responsible for loss of funds resulting of your use of our wallet interface or services. Please follow best practices to keep your keys and funds safe and report any security vulnerabilities of our app in the Issues tab. We highly recommend that you build from source so that you can audit the code yourself and make sure that nobody has tampered with the wallet software.
