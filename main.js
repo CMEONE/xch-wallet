@@ -22,7 +22,7 @@ const createWindow = () => {
 		backgroundColor: "#373c46",
 		icon: path.join(__dirname, 'public/XCHWallet.png')
 	});
-	win.loadFile('index.html');
+	win.loadFile(path.join(__dirname, 'src/index.html'));
 
 	win.webContents.on('new-window', function(e, url) {
 		e.preventDefault();

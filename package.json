@@ -50,6 +50,7 @@
 			"./dist/**/*",
 			"./node_modules/**/*",
 			"./public/**/*",
+			"./src/**/*",
 			"*.js"
 		],
 		"directories": {
