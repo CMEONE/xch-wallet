@@ -36,3 +36,6 @@ When using the windows version of XCH Wallet, you may encounter a warning that p
 
 ## Keys
 For security reasons, there is currently no way to generate or add keys through the XCH Wallet interface. To create or add keys, please use the CLI or official wallet.
+
+## Limitation of Liability
+We are not in any way responsible for loss of funds resulting of your use of our wallet interface or services. Please follow best practices to keep your keys and funds safe and report any security vulnerabilities of our app in the Issues tab.
