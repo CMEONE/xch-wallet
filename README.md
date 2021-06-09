@@ -12,6 +12,8 @@ A modern interface for the Chia wallet
 - [Install](#install)
 	- [Pre-built](#pre-built)
 	- [Built](#build)
+	- [macOS Warning](#macos-warning)
+	- [Windows Warning](#windows-warning)
 
 ## Install
 
