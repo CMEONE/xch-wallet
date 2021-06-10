@@ -36,6 +36,9 @@ When using the macOS version of XCH Wallet, you may encounter a warning that pre
 ### Windows Warning
 When using the windows version of XCH Wallet, you may encounter a warning that prevents you from opening the app. This warning just means that the app has not been signed (since it was done transparently with a Github Action). To fix this issue, simply click the "More info" text on the popup and click the "Run anyway" option. If you are uncomfortable with running the prebuilt version, we encourage that you follow the manual build instructions above.
 
+### Launch Error
+If you encounter an error when launching the app, there was an issue accessing the Chia CLI. The wallet will attempt to connect to the CLI by guessing the filepath based on your operating system, but if there is an error, we recommend you add the `chia` command to your `PATH` so that the wallet can access the CLI.
+
 ## Keys
 For security reasons, there is currently no way to generate or add keys through the XCH Wallet interface. To create or add keys, please use the CLI or official wallet.
 
