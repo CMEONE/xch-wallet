@@ -1,6 +1,6 @@
 {
 	"name": "xch-wallet",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"description": "A modern interface for the Chia wallet",
 	"productName": "XCH Wallet",
 	"main": "main.js",
