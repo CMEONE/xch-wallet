@@ -546,7 +546,7 @@ const loadDaemon = () => {
 	});
 }
 
-const version = "1.0.4";
+const version = "1.0.5";
 
 const get_update_data = () => {
 	return new Promise(async (resolve, reject) => {
